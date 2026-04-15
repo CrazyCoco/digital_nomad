@@ -84,7 +84,11 @@ class _ChatPageState extends State<ChatPage> {
               child: Container(
                 color: const Color(0xFFB3E5FC),
                 child: const Center(
-                  child: Icon(Icons.headphones, size: 60, color: Colors.white54),
+                  child: Icon(
+                    Icons.headphones,
+                    size: 60,
+                    color: Colors.white54,
+                  ),
                 ),
               ),
             ),
@@ -97,12 +101,19 @@ class _ChatPageState extends State<ChatPage> {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: 6),
                 const Text(
                   'Chatting hot',
-                  style: TextStyle(fontSize: 12, color: Colors.orange, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -121,39 +132,61 @@ class _ChatPageState extends State<ChatPage> {
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
-                      Shadow(offset: Offset(1, 1), blurRadius: 3, color: Colors.black54),
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 3,
+                        color: Colors.black54,
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Row(
+                    Stack(
+                      clipBehavior: Clip.none,
                       children: [
                         for (int i = 0; i < 3; i++)
-                          Container(
-                            width: 24,
-                            height: 24,
-                            margin: EdgeInsets.only(right: i < 2 ? -8 : 0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 1.5),
+                          Positioned(
+                            left: i * 16.0,
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.person,
+                                size: 16,
+                                color: Color(0xFF2196F3),
+                              ),
                             ),
-                            child: const Icon(Icons.person, size: 16, color: Color(0xFF2196F3)),
                           ),
                       ],
                     ),
+                    const SizedBox(width: 48),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFBBDEFB),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Text(
                         'Join',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ],

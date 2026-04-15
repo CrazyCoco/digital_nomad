@@ -2,7 +2,6 @@ import 'package:digital_nomad/page/chat/chat_view.dart';
 import 'package:digital_nomad/page/explore/explore_view.dart';
 import 'package:digital_nomad/page/home/home_view.dart';
 import 'package:digital_nomad/page/main_tab/main_tab_logic.dart';
-import 'package:digital_nomad/page/post/post_view.dart';
 import 'package:digital_nomad/page/profile/profile_view.dart';
 import 'package:digital_nomad/page/store/store_view.dart';
 import 'package:flutter/material.dart';
@@ -37,10 +36,7 @@ class _MainTabPageState extends State<MainTabPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFFE8EEF0),
         body: GetBuilder<MainTabLogic>(
-          builder: (l) => IndexedStack(
-            index: l.selectedIndex,
-            children: pages,
-          ),
+          builder: (l) => IndexedStack(index: l.selectedIndex, children: pages),
         ),
         bottomNavigationBar: GetBuilder<MainTabLogic>(
           builder: (l) => Container(
