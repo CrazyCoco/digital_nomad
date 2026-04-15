@@ -1,3 +1,4 @@
+import 'package:digital_nomad/page/main_tab/main_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -60,8 +61,8 @@ class SignInLogic extends GetxController {
       EasyLoading.dismiss();
       EasyLoading.showSuccess('Sign in successful');
       
-      // TODO: Navigate to home page
-      // Get.offAllNamed('/home');
+      // Navigate to home page
+      Get.offAll(() => const MainTabPage());
     });
   }
   
