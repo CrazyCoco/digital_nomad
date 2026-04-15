@@ -4,7 +4,9 @@ import 'package:bmob_plugin/bmob/bmob.dart';
 import 'package:bmob_plugin/bmob/response/bmob_error.dart';
 import 'package:bmob_plugin/bmob/table/bmob_user.dart';
 import 'package:digital_nomad/page/login_index/login_index_view.dart';
+import 'package:digital_nomad/page/onboarding/onboarding_view.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class LogoLogic extends GetxController {
   @override
@@ -33,10 +35,14 @@ class LogoLogic extends GetxController {
     //     });
   }
 
+  void setHome() {
+    final box = GetStorage();
+    final hasCompletedOnboarding = box.read('onboarding_completed') ?? false;
 
-  void setHome(){
-    Get.offAll((){
-      return LoginIndexPage();
+    Get.offAll(() {
+      return hasCompletedOnboarding
+          ? const LoginIndexPage()
+          : const OnboardingPage();
     });
   }
 
