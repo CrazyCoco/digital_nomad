@@ -7,6 +7,9 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../create_account/create_account_view.dart';
+import '../sign_in/sign_in_view.dart';
+
 class LoginIndexLogic extends GetxController {
   @override
   void onReady() {
@@ -87,16 +90,12 @@ class LoginIndexLogic extends GetxController {
 
   /// Create Account
   void onCreateAccount() {
-    EasyLoading.showInfo('Navigate to register page');
-    // TODO: Navigate to register page
-    // Get.toNamed('/register');
+    Get.to(() => const CreateAccountPage());
   }
 
   /// Sign In
   void onSignIn() {
-    EasyLoading.showInfo('Navigate to login page');
-    // TODO: Navigate to login page
-    // Get.toNamed('/login');
+    Get.to(() => const SignInPage());
   }
 
   /// User Agreement
