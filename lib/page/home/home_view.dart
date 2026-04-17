@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 import 'home_logic.dart';
 
 class HomePage extends StatefulWidget {
@@ -195,13 +197,21 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Stack(
                       children: [
-                        CircleAvatar(
-                          radius: 35,
-                          backgroundColor: const Color(0xFFBBDEFB),
-                          child: const Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Color(0xFF2196F3),
+                        GestureDetector(
+                          onTap: () => NavigationUtil.toUserPage(userName: user['name']),
+                          child: CircleAvatar(
+                            radius: 35,
+                            backgroundImage: user['avatar'] != null
+                                ? AssetImage(user['avatar'])
+                                : null,
+                            backgroundColor: const Color(0xFFBBDEFB),
+                            child: user['avatar'] == null
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: Color(0xFF2196F3),
+                                  )
+                                : null,
                           ),
                         ),
                         if (user['online'])
@@ -294,7 +304,10 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           itemCount: l.posts.length,
           itemBuilder: (context, index) {
-            return _buildPostCard(l.posts[index], index);
+            return GestureDetector(
+              onTap: () => logic.onPostTap(index),
+              child: _buildPostCard(l.posts[index], index),
+            );
           },
         );
       },
@@ -311,26 +324,25 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Stack(
         children: [
+          // Post image
           Positioned.fill(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.desktop_mac,
-                    size: 60,
-                    color: Colors.blueGrey.withOpacity(0.3),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Post Image',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blueGrey.withOpacity(0.5),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: post['image'] != null
+                  ? Image.asset(
+                      post['image'],
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      color: const Color(0xFFE1F5FE),
+                      child: Center(
+                        child: Icon(
+                          Icons.desktop_mac,
+                          size: 60,
+                          color: Colors.blueGrey.withOpacity(0.3),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
           Positioned(
@@ -417,13 +429,21 @@ class _HomePageState extends State<HomePage> {
             bottom: 12,
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: const Color(0xFFBBDEFB),
-                  child: const Icon(
-                    Icons.person,
-                    size: 20,
-                    color: Color(0xFF2196F3),
+                GestureDetector(
+                  onTap: () => NavigationUtil.toUserPage(userName: post['user']),
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundImage: post['avatar'] != null
+                        ? AssetImage(post['avatar'])
+                        : null,
+                    backgroundColor: const Color(0xFFBBDEFB),
+                    child: post['avatar'] == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 20,
+                            color: Color(0xFF2196F3),
+                          )
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 8),

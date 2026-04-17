@@ -1,7 +1,8 @@
-import 'package:digital_nomad/page/main_tab/main_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+
+import '../../routes/app_routes.dart';
 
 class SignInLogic extends GetxController {
   // Form controllers
@@ -62,14 +63,13 @@ class SignInLogic extends GetxController {
       EasyLoading.showSuccess('Sign in successful');
       
       // Navigate to home page
-      Get.offAll(() => const MainTabPage());
+      NavigationUtil.toMainTab();
     });
   }
   
   /// Create account
   void onCreateAccount() {
     Get.back();
-    // TODO: Navigate to create account page
-    // Get.toNamed('/create-account');
+    NavigationUtil.toCreateAccount();
   }
 }

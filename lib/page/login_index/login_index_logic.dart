@@ -2,13 +2,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../create_account/create_account_view.dart';
-import '../sign_in/sign_in_view.dart';
+import '../../routes/app_routes.dart';
 
 class LoginIndexLogic extends GetxController {
   @override
@@ -90,12 +88,12 @@ class LoginIndexLogic extends GetxController {
 
   /// Create Account
   void onCreateAccount() {
-    Get.to(() => const CreateAccountPage());
+    NavigationUtil.toCreateAccount();
   }
 
   /// Sign In
   void onSignIn() {
-    Get.to(() => const SignInPage());
+    NavigationUtil.toSignIn();
   }
 
   /// User Agreement

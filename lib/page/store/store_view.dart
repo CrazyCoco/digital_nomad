@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
 
@@ -100,16 +102,19 @@ class _StorePageState extends State<StorePage> {
                   children: [
                     Stack(
                       children: [
-                        CircleAvatar(
-                          radius: 32,
-                          backgroundImage: const NetworkImage(
-                            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop',
-                          ),
-                          backgroundColor: const Color(0xFFE1F5FE),
-                          child: const Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Color(0xFF2196F3),
+                        GestureDetector(
+                          onTap: () => NavigationUtil.toUserPage(userName: request['name']),
+                          child: CircleAvatar(
+                            radius: 32,
+                            backgroundImage: const NetworkImage(
+                              'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop',
+                            ),
+                            backgroundColor: const Color(0xFFE1F5FE),
+                            child: const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Color(0xFF2196F3),
+                            ),
                           ),
                         ),
                         Positioned(

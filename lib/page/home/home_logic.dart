@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class HomeLogic extends GetxController {
   // Tab controller
   int selectedTab = 0;
@@ -10,11 +12,11 @@ class HomeLogic extends GetxController {
   
   // Mock data for "You might like"
   final List<Map<String, dynamic>> suggestedUsers = [
-    {'name': 'User 1', 'online': true},
-    {'name': 'User 2', 'online': false},
-    {'name': 'User 3', 'online': true},
-    {'name': 'User 4', 'online': false},
-    {'name': 'User 5', 'online': false},
+    {'name': 'User 1', 'online': true, 'avatar': 'images/Ellipse 783@3x(1).png'},
+    {'name': 'User 2', 'online': false, 'avatar': 'images/Ellipse 783@3x(2).png'},
+    {'name': 'User 3', 'online': true, 'avatar': 'images/Ellipse 783@3x(3).png'},
+    {'name': 'User 4', 'online': false, 'avatar': 'images/Ellipse 783@3x(4).png'},
+    {'name': 'User 5', 'online': false, 'avatar': 'images/Ellipse 783@3x(5).png'},
   ];
   
   // Mock data for posts
@@ -26,6 +28,8 @@ class HomeLogic extends GetxController {
       'likes': 38,
       'liked': true,
       'weather': 'sunny',
+      'image': 'images/Group 1000009700@3x(1).png',
+      'avatar': 'images/Ellipse 783@3x(6).png',
     },
     {
       'user': 'Cali Vibes',
@@ -34,6 +38,8 @@ class HomeLogic extends GetxController {
       'likes': 25,
       'liked': false,
       'weather': 'sunny',
+      'image': 'images/Group 1000009700@3x(2).png',
+      'avatar': 'images/Ellipse 783@3x(7).png',
     },
   ];
   
@@ -68,5 +74,10 @@ class HomeLogic extends GetxController {
       posts[postIndex]['likes']--;
     }
     update();
+  }
+  
+  /// Navigate to post detail
+  void onPostTap(int index) {
+    NavigationUtil.toPostDetail(postData: posts[index]);
   }
 }

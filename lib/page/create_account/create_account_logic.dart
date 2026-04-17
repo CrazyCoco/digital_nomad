@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../routes/app_routes.dart';
 
 class CreateAccountLogic extends GetxController {
   // Page controller for step navigation
@@ -193,9 +192,8 @@ class CreateAccountLogic extends GetxController {
       EasyLoading.dismiss();
       EasyLoading.showSuccess('Account created successfully');
 
-      // TODO: Navigate to home page or login page
-      // Get.offAllNamed('/home');
-      Get.back();
+      // Navigate to main page
+      NavigationUtil.toMainTab();
     });
   }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:digital_nomad/page/post/post_logic.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -171,6 +173,12 @@ class _PostPageState extends State<PostPage> {
   }
 
   Widget _buildImageItem(PostLogic l, int index) {
+    final imagePath = l.images[index];
+    final isLocalFile = !imagePath.startsWith('http') && 
+                        (imagePath.endsWith('.png') || 
+                         imagePath.endsWith('.jpg') || 
+                         imagePath.endsWith('.jpeg'));
+    
     return Stack(
       children: [
         Container(
@@ -178,11 +186,21 @@ class _PostPageState extends State<PostPage> {
           height: 120,
           margin: const EdgeInsets.only(right: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFE1F5FE),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Center(
-            child: Icon(Icons.image, size: 50, color: Color(0xFF42A5F5)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: isLocalFile
+                ? Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    color: const Color(0xFFE1F5FE),
+                    child: const Center(
+                      child: Icon(Icons.image, size: 50, color: Color(0xFF42A5F5)),
+                    ),
+                  ),
           ),
         ),
         Positioned(

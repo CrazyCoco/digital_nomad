@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -36,6 +38,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildStats(),
                       const SizedBox(height: 20),
                       _buildRechargeButton(),
+                      const SizedBox(height: 20),
+                      _buildMenuList(),
                       const SizedBox(height: 20),
                       _buildContentTabs(),
                       const SizedBox(height: 16),
@@ -86,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const CircleAvatar(
             radius: 40,
             backgroundColor: Color(0xFFBBDEFB),
-            child: Icon(Icons.person, size: 50, color: Color(0xFF2196F3)),
+            backgroundImage: AssetImage('images/Ellipse 783@3x.png'),
           ),
           const SizedBox(width: 16),
           Column(
@@ -97,18 +101,21 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
           const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black54),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.edit, size: 16, color: Colors.black54),
-                SizedBox(width: 4),
-                Text('Edit Profile', style: TextStyle(fontSize: 14, color: Colors.black54)),
-              ],
+          GestureDetector(
+            onTap: logic.onEditProfile,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black54),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.edit, size: 16, color: Colors.black54),
+                  SizedBox(width: 4),
+                  Text('Edit Profile', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                ],
+              ),
             ),
           ),
         ],
@@ -117,27 +124,40 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildStats() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _StatItem(count: '1900', label: 'Following'),
-          _StatItem(count: '360', label: 'Followers'),
-          _StatItem(count: '20', label: 'Friends'),
-        ],
-      ),
+    return GetBuilder<ProfileLogic>(
+      builder: (l) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              GestureDetector(
+                onTap: l.onFollowing,
+                child: const _StatItem(count: '1900', label: 'Following'),
+              ),
+              GestureDetector(
+                onTap: l.onFollowers,
+                child: const _StatItem(count: '360', label: 'Followers'),
+              ),
+              GestureDetector(
+                onTap: l.onFriends,
+                child: const _StatItem(count: '20', label: 'Friends'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildRechargeButton() {
     return GestureDetector(
-      onTap: () {},
+      onTap: logic.onRecharge,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -162,6 +182,86 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: const Icon(Icons.star, size: 28, color: Colors.white),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuList() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          _buildMenuItem(
+            icon: Icons.settings,
+            title: 'Settings',
+            onTap: logic.onSettings,
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.person_add,
+            title: 'Friend Requests',
+            onTap: logic.onFriendRequests,
+            showBadge: true,
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.block,
+            title: 'Blacklist',
+            onTap: logic.onBlacklist,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool showBadge = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 24, color: Colors.black87),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            if (showBadge)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Text(
+                  '3',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            if (showBadge) const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, size: 24, color: Colors.black54),
           ],
         ),
       ),
@@ -240,11 +340,14 @@ class _ProfilePageState extends State<ProfilePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Color(0xFFBBDEFB),
-                  child: Icon(Icons.person, size: 30, color: Color(0xFF2196F3)),
+              children: [
+                GestureDetector(
+                  onTap: () => NavigationUtil.toUserPage(userName: 'Danny'),
+                  child: const CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Color(0xFFBBDEFB),
+                    backgroundImage: AssetImage('images/Ellipse 783@3x.png'),
+                  ),
                 ),
                 SizedBox(width: 12),
                 Column(

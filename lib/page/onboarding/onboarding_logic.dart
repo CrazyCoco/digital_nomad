@@ -1,7 +1,8 @@
-import 'package:digital_nomad/page/main_tab/main_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+
+import '../../routes/app_routes.dart';
 
 class OnboardingLogic extends GetxController {
   // Page controller for onboarding
@@ -53,7 +54,7 @@ class OnboardingLogic extends GetxController {
   void onSkip() {
     // Mark onboarding as completed
     GetStorage().write('onboarding_completed', true);
-    Get.offAll(() => const MainTabPage());
+    NavigationUtil.toMainTab();
   }
 
   /// Go to next page or complete

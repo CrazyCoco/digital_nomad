@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class ProfileLogic extends GetxController {
   int selectedTab = 4;
   int contentTab = 0;
@@ -27,5 +29,37 @@ class ProfileLogic extends GetxController {
   void selectContentTab(int index) { 
     contentTab = index;
     update();
+  }
+  
+  void onEditProfile() {
+    NavigationUtil.toEditProfile();
+  }
+  
+  void onSettings() {
+    NavigationUtil.toSettings();
+  }
+  
+  void onFollowers() {
+    NavigationUtil.toFollowList(initialTab: 1);
+  }
+  
+  void onFollowing() {
+    NavigationUtil.toFollowList(initialTab: 0);
+  }
+  
+  void onFriends() {
+    NavigationUtil.toFollowList(initialTab: 2);
+  }
+  
+  void onFriendRequests() {
+    NavigationUtil.toFriendRequest();
+  }
+  
+  void onBlacklist() {
+    NavigationUtil.toBlacklist();
+  }
+  
+  void onRecharge() {
+    NavigationUtil.toRecharge();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:digital_nomad/page/logo/logo_view.dart';
+import 'package:digital_nomad/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
         ),
       ),
       home: const LogoPage(),
+      getPages: AppPages.routes,
     ),
   );
 }
