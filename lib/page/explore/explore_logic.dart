@@ -267,7 +267,13 @@ class ExploreLogic extends GetxController {
   
   /// Navigate to user profile
   void onUserTap(String userName) {
-    NavigationUtil.toUserPage(userName: userName);
+    Get.toNamed(
+      '/userPage',
+      arguments: {'userName': userName},
+    )?.then((_) {
+      // Refresh posts when returning from user page
+      loadPosts();
+    });
   }
   
   /// Navigate to post detail

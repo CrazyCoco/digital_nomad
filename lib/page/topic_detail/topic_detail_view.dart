@@ -33,6 +33,33 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
+          actions: [
+            GetBuilder<TopicDetailLogic>(
+              builder: (l) {
+                return TextButton(
+                  onPressed: l.onJoinTopic,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: l.isJoined ? Colors.grey[300] : const Color(0xFF42A5F5),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      l.isJoined ? 'Joined' : 'Join',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: l.isJoined ? Colors.black54 : Colors.white,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: GetBuilder<TopicDetailLogic>(
           builder: (l) {
@@ -54,6 +81,14 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                         color: Colors.grey[600],
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Be the first to share!',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[500],
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -62,56 +97,93 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
             return ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                // Topic stats
+                // Topic header card
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        children: [
-                          Text(
-                            '${l.postsCount}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Posts',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+                      Text(
+                        l.topicDescription,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
                       ),
-                      Container(
-                        width: 1,
-                        height: 40,
-                        color: Colors.grey[300],
-                      ),
-                      Column(
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text(
-                            '${l.participantsCount}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Column(
+                            children: [
+                              Text(
+                                '${l.postsCount}',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Posts',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Participants',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: Colors.grey[300],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                '${l.participantsCount}',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Participants',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: Colors.grey[300],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                l.topicViews,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Views',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -119,6 +191,74 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Top contributors
+                if (l.topContributors.isNotEmpty) ...[
+                  Text(
+                    'Top Contributors',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 90,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: l.topContributors.length,
+                      itemBuilder: (context, index) {
+                        final contributor = l.topContributors[index];
+                        return GestureDetector(
+                          onTap: () => l.onContributorTap(
+                            contributor['userId'],
+                            contributor['userName'],
+                          ),
+                          child: Container(
+                            width: 80,
+                            margin: const EdgeInsets.only(right: 12),
+                            child: Column(
+                              children: [
+                                CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: const Color(0xFFBBDEFB),
+                                  backgroundImage: contributor['avatar'] != null && 
+                                      contributor['avatar'].isNotEmpty
+                                      ? AssetImage(contributor['avatar'])
+                                      : null,
+                                  child: (contributor['avatar'] == null || 
+                                      contributor['avatar'].isEmpty)
+                                      ? const Icon(Icons.person, size: 28, 
+                                          color: Color(0xFF2196F3))
+                                      : null,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  contributor['userName'].split(' ').first,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${contributor['postCount']} posts',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 // Posts list
                 ...l.posts.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -162,21 +302,23 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      post['user'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post['user'],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      post['time'],
-                      style: const TextStyle(fontSize: 12, color: Colors.black54),
-                    ),
-                  ],
+                      Text(
+                        post['time'],
+                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -187,9 +329,8 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            if (post['image'] != null && post['image'].isNotEmpty)
+            if (post['image'] != null && post['image'].isNotEmpty) ...[
               const SizedBox(height: 12),
-            if (post['image'] != null && post['image'].isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
@@ -199,6 +340,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                   fit: BoxFit.cover,
                 ),
               ),
+            ],
             const SizedBox(height: 12),
             Row(
               children: [
@@ -226,7 +368,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                     );
                   },
                 ),
-                const Spacer(),
+                const SizedBox(width: 16),
                 Row(
                   children: [
                     const Icon(Icons.comment_outlined, size: 20, color: Colors.black54),
@@ -236,6 +378,25 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                       style: const TextStyle(fontSize: 14, color: Colors.black54),
                     ),
                   ],
+                ),
+                const SizedBox(width: 16),
+                GestureDetector(
+                  onTap: () => logic.onShare(index),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.share_outlined, size: 20, color: Colors.black54),
+                      SizedBox(width: 4),
+                      Text(
+                        'Share',
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${post['views']} views',
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
                 ),
               ],
             ),
