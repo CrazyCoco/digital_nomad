@@ -158,7 +158,15 @@ class HomeLogic extends GetxController {
     if (index >= 0 && index < currentPosts.length) {
       final post = currentPosts[index];
       if (post['isVideo'] == true && post['videoPath'] != null) {
-        NavigationUtil.toVideoPlayer(videoPath: post['videoPath']);
+        NavigationUtil.toVideoPlayer(
+          videoPath: post['videoPath'],
+          userName: post['user'] ?? 'Unknown',
+          userAvatar: post['avatar'] ?? '',
+          description: post['description'] ?? '',
+          likes: post['likes'] ?? 0,
+          isLiked: post['liked'] ?? false,
+          time: post['time'] ?? '',
+        );
       }
     }
   }

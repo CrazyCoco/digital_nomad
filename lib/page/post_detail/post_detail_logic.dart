@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../comm/realm_service.dart';
+
 class PostDetailLogic extends GetxController {
+  final RealmService _realmService = RealmService();
+  
+  // Post ID for Realm update
+  String postId = '';
   // 动态信息
   String userName = 'John Doe';
   String userAvatar = 'images/head_1.jpg';
@@ -200,36 +206,70 @@ class PostDetailLogic extends GetxController {
   
   /// 加载帖子数据
   void loadPostData(Map<String, dynamic> postData) {
+    postId = postData['id'] ?? '';
     userName = postData['user'] ?? 'Unknown User';
     userAvatar = postData['avatar'] ?? 'images/head_1.jpg';
     postTime = postData['time'] ?? 'Just now';
-    postContent = postData['description'] ?? 'No description';
-    postImage = postData['image'] ?? 'images/8952cc30813886ec84178206d8877d23.jpg';
+    postContent = postData['content'] ?? postData['description'] ?? 'No description';
+    postImage = postData['image'] ?? postData['images']?.firstOrNull ?? '';
     likes = postData['likes'] ?? 0;
     isLiked = postData['liked'] ?? false;
+    comments = postData['comments'] ?? 0;
+    shares = postData['shares'] ?? 0;
     
-    // 根据帖子内容生成唯一的评论key
-    String postKey = _generatePostKey(postData);
-    commentsList = List<Map<String, dynamic>>.from(
-      commentsDatabase[postKey] ?? commentsDatabase['post_1']!
-    );
-    comments = commentsList.length;
+    // 根据帖子ID加载评论（如果没有ID则根据内容生成）
+    if (postId.isNotEmpty) {
+      _loadCommentsByPostId(postId);
+    } else {
+      _loadCommentsByContent(postContent);
+    }
     
     update();
   }
   
-  /// 生成帖子唯一标识
-  String _generatePostKey(Map<String, dynamic> postData) {
-    final image = postData['image'] as String?;
-    if (image != null) {
-      if (image.contains('8952cc')) return 'post_1';
-      if (image.contains('948f9b')) return 'post_2';
-      if (image.contains('afc548')) return 'post_3';
-      if (image.contains('c7f144')) return 'post_4';
-      if (image.contains('cc6d29')) return 'post_5';
-      if (image.contains('e9e17b')) return 'post_6';
+  /// 根据帖子ID加载评论
+  void _loadCommentsByPostId(String id) {
+    // 使用postId的哈希值来生成伪随机但一致的评论
+    final hashCode = id.hashCode.abs();
+    final commentIndex = hashCode % commentsDatabase.length;
+    final keys = commentsDatabase.keys.toList();
+    final selectedKey = keys[commentIndex % keys.length];
+    
+    commentsList = List<Map<String, dynamic>>.from(
+      commentsDatabase[selectedKey]!
+    );
+    
+    // 根据帖子ID稍微调整评论数量
+    final adjustment = (hashCode % 3) - 1; // -1, 0, or 1
+    if (adjustment > 0 && commentsList.isNotEmpty) {
+      // 添加一条额外评论
+      commentsList.add({
+        'user': 'Alex Johnson',
+        'avatar': 'images/head_3.jpg',
+        'content': 'Great post! Thanks for sharing 🙏',
+        'time': 'Just now',
+        'likes': 0,
+      });
+    } else if (adjustment < 0 && commentsList.length > 2) {
+      // 移除最后一条评论
+      commentsList.removeLast();
     }
-    return 'post_1'; // 默认
+    
+    comments = commentsList.length;
+  }
+  
+  /// 根据帖子内容加载评论
+  void _loadCommentsByContent(String content) {
+    // 使用内容哈希来选择评论模板
+    final hashCode = content.hashCode.abs();
+    final commentIndex = hashCode % commentsDatabase.length;
+    final keys = commentsDatabase.keys.toList();
+    final selectedKey = keys[commentIndex % keys.length];
+    
+    commentsList = List<Map<String, dynamic>>.from(
+      commentsDatabase[selectedKey]!
+    );
+    comments = commentsList.length;
   }
   
   void toggleLike() {
@@ -239,6 +279,12 @@ class PostDetailLogic extends GetxController {
     } else {
       likes--;
     }
+    
+    // Update in Realm if postId exists
+    if (postId.isNotEmpty) {
+      _realmService.toggleLike(postId);
+    }
+    
     update();
   }
   
@@ -255,6 +301,7 @@ class PostDetailLogic extends GetxController {
       'likes': 0,
     });
     
+    comments = commentsList.length;
     commentController.clear();
     update();
   }
@@ -264,8 +311,51 @@ class PostDetailLogic extends GetxController {
   }
   
   void onShare() {
-    // TODO: Share functionality
-    print('Share post');
+    shares++;
+    Get.snackbar(
+      'Shared!',
+      'Post shared successfully',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
+    update();
+  }
+  
+  void onUserTap() {
+    // Navigate to user profile
+    Get.back();
+    // TODO: NavigationUtil.toUserPage(userName: userName);
+  }
+  
+  void onCommentLike(int commentIndex) {
+    if (commentIndex >= 0 && commentIndex < commentsList.length) {
+      final comment = commentsList[commentIndex];
+      if (comment['liked'] == true) {
+        comment['liked'] = false;
+        comment['likes'] = (comment['likes'] as int) - 1;
+      } else {
+        comment['liked'] = true;
+        comment['likes'] = (comment['likes'] as int) + 1;
+      }
+      update();
+    }
+  }
+  
+  void onDeleteComment(int commentIndex) {
+    if (commentIndex >= 0 && commentIndex < commentsList.length) {
+      final comment = commentsList[commentIndex];
+      if (comment['user'] == 'You') {
+        commentsList.removeAt(commentIndex);
+        comments = commentsList.length;
+        update();
+        Get.snackbar(
+          'Deleted',
+          'Comment deleted',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    }
   }
   
   @override

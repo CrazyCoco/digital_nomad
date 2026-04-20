@@ -101,110 +101,115 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   Widget _buildHotTopics() {
-    return GestureDetector(
-      onTap: logic.onTopicTap,
-      child: SizedBox(
-        height: 160,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemCount: logic.hotTopics.length,
-          itemBuilder: (context, index) {
-            final topic = logic.hotTopics[index];
-            return Container(
-              width: 200,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                  // Background image
-                  Positioned.fill(
-                    child: ClipRRect(
+    return GetBuilder<ExploreLogic>(
+      builder: (l) {
+        return GestureDetector(
+          onTap: logic.onTopicTap,
+          child: SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: l.hotTopics.length,
+              itemBuilder: (context, index) {
+                final topic = l.hotTopics[index];
+                return GestureDetector(
+                  onTap: () => l.onTopicItemTap(index),
+                  child: Container(
+                    width: 200,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      child: topic['image'] != null
-                          ? Image.asset(topic['image'], fit: BoxFit.cover)
-                          : Container(color: topic['color']),
                     ),
-                  ),
-                  // Overlay
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          bottomRight: Radius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Hot',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Stack(
                       children: [
-                        const SizedBox(height: 16),
-                        Text(
-                          topic['title'],
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: topic['image'] != null
+                                ? Image.asset(topic['image'], fit: BoxFit.cover)
+                                : Container(color: topic['color']),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.remove_red_eye,
-                              size: 14,
-                              color: Colors.white70,
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              topic['views'],
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.white70,
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(12),
                               ),
                             ),
-                          ],
+                            child: const Text(
+                              'Hot',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 16),
+                              Text(
+                                topic['title'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.remove_red_eye,
+                                    size: 14,
+                                    color: Colors.white70,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    topic['views'],
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -280,13 +285,41 @@ class _ExplorePageState extends State<ExplorePage> {
   Widget _buildPosts() {
     return GetBuilder<ExploreLogic>(
       builder: (l) {
+        if (l.displayPosts.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.explore_outlined,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l.contentTab == 1
+                        ? 'No posts from followed users yet'
+                        : 'No posts available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemCount: l.posts.length,
+          itemCount: l.displayPosts.length,
           itemBuilder: (context, index) {
-            return _buildPostCard(l.posts[index], index);
+            return _buildPostCard(l.displayPosts[index], index);
           },
         );
       },
@@ -294,231 +327,214 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   Widget _buildPostCard(Map<String, dynamic> post, int index) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => NavigationUtil.toUserPage(userName: post['user']),
-                child: CircleAvatar(
-                  radius: 24,
-                  backgroundImage: post['avatar'] != null
-                      ? AssetImage(post['avatar'])
-                      : null,
-                  backgroundColor: const Color(0xFFBBDEFB),
-                  child: post['avatar'] == null
-                      ? const Icon(
-                          Icons.person,
-                          size: 30,
-                          color: Color(0xFF2196F3),
-                        )
-                      : null,
+    return GestureDetector(
+      onTap: () => logic.onPostTap(index),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => logic.onUserTap(post['user']),
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundImage: post['avatar'] != null
+                        ? AssetImage(post['avatar'])
+                        : null,
+                    backgroundColor: const Color(0xFFBBDEFB),
+                    child: post['avatar'] == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 30,
+                            color: Color(0xFF2196F3),
+                          )
+                        : null,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    post['user'],
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    post['time'],
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              GetBuilder<ExploreLogic>(
-                builder: (l) {
-                  return GestureDetector(
-                    onTap: () => l.toggleFollow(index),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: post['following']
-                              ? Colors.black26
-                              : const Color(0xFF42A5F5),
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        post['following'] ? 'Following' : 'Follow',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: post['following']
-                              ? Colors.black54
-                              : const Color(0xFF42A5F5),
-                        ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post['user'],
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            post['content'],
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-              height: 1.5,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 120,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: post['images'] != null && post['images'].length > 0
-                        ? Image.asset(post['images'][0], fit: BoxFit.cover)
-                        : Container(
-                            color: const Color(0xFFE1F5FE),
-                            child: const Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 40,
-                                color: Color(0xFF90CAF9),
-                              ),
-                            ),
+                    Text(
+                      post['time'],
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                GetBuilder<ExploreLogic>(
+                  builder: (l) {
+                    return GestureDetector(
+                      onTap: () => l.toggleFollow(index),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: post['following']
+                                ? Colors.black26
+                                : const Color(0xFF42A5F5),
                           ),
-                  ),
-                ),
-              ),
-              if (post['images'] != null && post['images'].length > 1)
-                Expanded(
-                  child: Container(
-                    height: 120,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(post['images'][1], fit: BoxFit.cover),
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  child: Container(
-                    height: 120,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE1F5FE),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.image,
-                        size: 40,
-                        color: Color(0xFF90CAF9),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.remove_red_eye,
-                    size: 16,
-                    color: Colors.black54,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    post['views'],
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  GetBuilder<ExploreLogic>(
-                    builder: (l) {
-                      return GestureDetector(
-                        onTap: () => l.toggleLike(index),
-                        child: Icon(
-                          post['liked']
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          size: 24,
-                          color: post['liked'] ? Colors.red : Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      );
-                    },
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          post['liked'] ? Icons.favorite : Icons.favorite_border,
-                          size: 18,
-                          color: post['liked'] ? Colors.red : Colors.black54,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${post['likes']}',
+                        child: Text(
+                          post['following'] ? 'Following' : 'Follow',
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: post['liked'] ? Colors.red : Colors.black54,
+                            color: post['following']
+                                ? Colors.black54
+                                : const Color(0xFF42A5F5),
                           ),
                         ),
-                      ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () => logic.onPostTap(index),
+              child: Text(
+                post['content'],
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (post['images'] != null && post['images'].length > 0)
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 120,
+                      margin: post['images'].length > 1
+                          ? const EdgeInsets.only(right: 8)
+                          : EdgeInsets.zero,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(post['images'][0], fit: BoxFit.cover),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Icon(
-                    Icons.error_outline,
-                    size: 24,
-                    color: Colors.black54,
-                  ),
+                  if (post['images'].length > 1)
+                    Expanded(
+                      child: Container(
+                        height: 120,
+                        margin: const EdgeInsets.only(left: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(post['images'][1], fit: BoxFit.cover),
+                        ),
+                      ),
+                    ),
                 ],
               ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.remove_red_eye,
+                      size: 16,
+                      color: Colors.black54,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      post['views'],
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    GetBuilder<ExploreLogic>(
+                      builder: (l) {
+                        return GestureDetector(
+                          onTap: () => l.toggleLike(index),
+                          child: Icon(
+                            post['liked']
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            size: 24,
+                            color: post['liked'] ? Colors.red : Colors.black54,
+                          ),
+                        );
+                      },
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE3F2FD),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            post['liked'] ? Icons.favorite : Icons.favorite_border,
+                            size: 18,
+                            color: post['liked'] ? Colors.red : Colors.black54,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${post['likes']}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: post['liked'] ? Colors.red : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () => logic.onReportPost(index),
+                      child: const Icon(
+                        Icons.error_outline,
+                        size: 24,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

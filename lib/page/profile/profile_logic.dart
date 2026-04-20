@@ -68,6 +68,9 @@ class ProfileLogic extends GetxController {
           'userId': post.userId,
           'userName': post.userName,
           'userAvatar': post.userAvatar,
+          'description': post.description ?? '',
+          'likes': post.likes,
+          'isLiked': post.isLiked,
         }).toList();
       }
     }
@@ -141,7 +144,15 @@ class ProfileLogic extends GetxController {
   void onVideoTap(int index) {
     if (index >= 0 && index < videos.length) {
       final video = videos[index];
-      NavigationUtil.toVideoPlayer(videoPath: video['videoPath']);
+      NavigationUtil.toVideoPlayer(
+        videoPath: video['videoPath'],
+        userName: video['userName'] ?? currentUserName,
+        userAvatar: video['userAvatar'] ?? currentUserAvatar,
+        description: video['description'] ?? video['title'] ?? '',
+        likes: video['likes'] ?? 0,
+        isLiked: video['isLiked'] ?? false,
+        time: video['time'] ?? '',
+      );
     }
   }
   

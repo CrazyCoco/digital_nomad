@@ -165,8 +165,14 @@ class NavigationUtil {
   }
 
   /// 跳转到话题详情
-  static void toTopicDetail({String? topicTitle}) {
-    Get.toNamed(AppRoutes.topicDetail, arguments: {'topicTitle': topicTitle});
+  static void toTopicDetail({String? topicTitle, String? topicViews}) {
+    Get.toNamed(
+      AppRoutes.topicDetail,
+      arguments: {
+        'topicTitle': topicTitle,
+        'topicViews': topicViews,
+      },
+    );
   }
 
   /// 跳转到点赞排行
@@ -203,8 +209,27 @@ class NavigationUtil {
   }
 
   /// 跳转到视频播放器
-  static void toVideoPlayer({required String videoPath}) {
-    Get.toNamed(AppRoutes.videoPlayer, arguments: {'videoPath': videoPath});
+  static void toVideoPlayer({
+    required String videoPath,
+    String userName = 'User',
+    String userAvatar = '',
+    String description = '',
+    int likes = 0,
+    bool isLiked = false,
+    String time = '',
+  }) {
+    Get.toNamed(
+      AppRoutes.videoPlayer,
+      arguments: {
+        'videoPath': videoPath,
+        'userName': userName,
+        'userAvatar': userAvatar,
+        'description': description,
+        'likes': likes,
+        'isLiked': isLiked,
+        'time': time,
+      },
+    );
   }
 
   /// 跳转到隐私政策

@@ -15,47 +15,20 @@ class ExploreLogic extends GetxController {
   // Popular/Following tab
   int contentTab = 0;
   
-  // Hot topics - 热门话题
-  final List<Map<String, dynamic>> hotTopics = [
-    {
-      'title': '#Nomad Life Stories & Experiences',
-      'views': '12.7K',
-      'color': const Color(0xFFB3E5FC),
-      'image': 'images/8952cc30813886ec84178206d8877d23.jpg',
-    },
-    {
-      'title': '#Gear Talk Essentials',
-      'views': '8.5K',
-      'color': const Color(0xFFFFCCBC),
-      'image': 'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
-    },
-    {
-      'title': '#Workspace Hacks & Setup Ideas',
-      'views': '15.2K',
-      'color': const Color(0xFFDCEDC8),
-      'image': 'images/afc548276bf301d627730fb09e06be7f.jpg',
-    },
-    {
-      'title': '#Travel Tips Guides',
-      'views': '20.1K',
-      'color': const Color(0xFFE1BEE7),
-      'image': 'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
-    },
-    {
-      'title': '#Remote Work Best Practices',
-      'views': '9.8K',
-      'color': const Color(0xFFFFF9C4),
-      'image': 'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
-    },
-  ];
+  // Hot topics - 热门话题 (从帖子数据动态生成)
+  List<Map<String, dynamic>> hotTopics = [];
   
   // Posts loaded from Realm
   List<Map<String, dynamic>> posts = [];
+  
+  // Filtered posts for display
+  List<Map<String, dynamic>> displayPosts = [];
   
   @override
   void onInit() {
     super.onInit();
     loadPosts();
+    loadFollowingState();
   }
   
   /// Load posts from Realm
@@ -71,10 +44,126 @@ class ExploreLogic extends GetxController {
       'views': '${(post.likes * 10 + post.comments * 5)}',
       'likes': post.likes,
       'liked': post.isLiked,
-      'following': false,
+      'following': false, // Will be updated in loadFollowingState
       'avatar': post.userAvatar ?? 'images/head_1.jpg',
-      'images': [post.image ?? ''],
+      'images': post.image != null && post.image!.isNotEmpty ? [post.image] : [],
       'category': post.category,
+    }).toList();
+    
+    // Load following state and then filter posts
+    loadFollowingState();
+    
+    // 帖子加载完后更新热门话题
+    loadHotTopics();
+  }
+  
+  /// Load following state for all posts
+  void loadFollowingState() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId != null) {
+      // Get all users I'm following (returns List<User>)
+      final followingUsers = _realmService.getFollowingUsers(currentUserId);
+      final followingUserIds = followingUsers.map((user) => user.id).toSet();
+      
+      // Update following state for each post
+      for (var post in posts) {
+        final userId = post['userId'] as String?;
+        if (userId != null) {
+          post['following'] = followingUserIds.contains(userId);
+        }
+      }
+    }
+    
+    // Update display posts based on current tab
+    updateDisplayPosts();
+    update();
+  }
+  
+  /// Update display posts based on selected tab
+  void updateDisplayPosts() {
+    if (contentTab == 0) {
+      // Popular tab: show all posts
+      displayPosts = List.from(posts);
+    } else {
+      // Following tab: show only posts from followed users
+      displayPosts = posts.where((post) => post['following'] == true).toList();
+    }
+  }
+  
+  /// Load hot topics from posts
+  void loadHotTopics() {
+    // 颜色主题池
+    final colors = [
+      const Color(0xFFB3E5FC),
+      const Color(0xFFFFCCBC),
+      const Color(0xFFDCEDC8),
+      const Color(0xFFE1BEE7),
+      const Color(0xFFFFF9C4),
+      const Color(0xFFC5CAE9),
+      const Color(0xFFB2DFDB),
+      const Color(0xFFF8BBD0),
+    ];
+    
+    final images = [
+      'images/8952cc30813886ec84178206d8877d23.jpg',
+      'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
+      'images/afc548276bf301d627730fb09e06be7f.jpg',
+      'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
+      'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
+      'images/c7f144b248e8c12c05b5b5e7e6f7e8f9.jpg',
+      'images/cc6d29a7b8c9d0e1f2a3b4c5d6e7f8a9.jpg',
+      'images/e9e17b6c7d8e9f0a1b2c3d4e5f6a7b8c.jpg',
+    ];
+    
+    // 从帖子中提取话题标签
+    Map<String, int> topicCount = {};
+    
+    for (final post in posts) {
+      final content = post['content'] as String? ?? '';
+      // 提取所有以 # 开头的标签
+      final hashtagRegex = RegExp(r'#\w+(?:\s+\w+)*');
+      final matches = hashtagRegex.allMatches(content);
+      
+      for (final match in matches) {
+        final topic = match.group(0)!;
+        topicCount[topic] = (topicCount[topic] ?? 0) + 1;
+      }
+    }
+    
+    // 如果没有话题，使用默认话题
+    if (topicCount.isEmpty) {
+      topicCount = {
+        '#NomadLife': 12,
+        '#RemoteWork': 10,
+        '#TravelTips': 8,
+        '#DigitalNomad': 15,
+        '#CoworkingSpace': 6,
+      };
+    }
+    
+    // 按出现次数排序，取前8个
+    final sortedTopics = topicCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    hotTopics = sortedTopics.take(8).map((entry) {
+      final index = sortedTopics.indexOf(entry);
+      final totalCount = entry.value;
+      // 格式化浏览量
+      String views;
+      if (totalCount >= 1000) {
+        views = '${(totalCount / 1000).toStringAsFixed(1)}K';
+      } else {
+        views = '$totalCount';
+      }
+      
+      return {
+        'title': entry.key,
+        'views': views,
+        'color': colors[index % colors.length],
+        'image': images[index % images.length],
+      };
     }).toList();
     
     update();
@@ -115,6 +204,7 @@ class ExploreLogic extends GetxController {
   /// Select content tab
   void selectContentTab(int index) {
     contentTab = index;
+    updateDisplayPosts();
     update();
   }
   
@@ -173,5 +263,68 @@ class ExploreLogic extends GetxController {
   
   void onTopicTap() {
     NavigationUtil.toTopic();
+  }
+  
+  /// Navigate to user profile
+  void onUserTap(String userName) {
+    NavigationUtil.toUserPage(userName: userName);
+  }
+  
+  /// Navigate to post detail
+  void onPostTap(int index) {
+    // Use displayPosts instead of posts
+    if (index >= 0 && index < displayPosts.length) {
+      final post = displayPosts[index];
+      // Navigate to post detail with callback
+      Get.toNamed(
+        '/postDetail',
+        arguments: post,
+      )?.then((_) {
+        // Refresh posts when returning from post detail
+        loadPosts();
+      });
+    }
+  }
+  
+  /// Play video
+  void onPlayVideo(int index) {
+    if (index >= 0 && index < posts.length) {
+      final post = posts[index];
+      if (post['isVideo'] == true && post['videoPath'] != null) {
+        NavigationUtil.toVideoPlayer(
+          videoPath: post['videoPath'],
+          userName: post['user'],
+          userAvatar: post['avatar'],
+          description: post['content'],
+          likes: post['likes'],
+          isLiked: post['liked'],
+          time: post['time'],
+        );
+      }
+    }
+  }
+  
+  /// Report post
+  void onReportPost(int index) {
+    if (index >= 0 && index < posts.length) {
+      final post = posts[index];
+      NavigationUtil.toReport(
+        reportedType: 'post',
+        reportedUserName: post['user'] ?? 'Unknown',
+        reportedContent: post['content'] ?? '',
+      );
+    }
+  }
+  
+  /// Navigate to topic detail
+  void onTopicItemTap(int index) {
+    if (index >= 0 && index < hotTopics.length) {
+      final topic = hotTopics[index];
+      // Pass topic data to detail page
+      NavigationUtil.toTopicDetail(
+        topicTitle: topic['title'],
+        topicViews: topic['views'],
+      );
+    }
   }
 }
