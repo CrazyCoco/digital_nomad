@@ -10,7 +10,7 @@ class ChatLogic extends GetxController {
   final List<Map<String, dynamic>> privateChats = [
     {
       'name': 'Alice Johnson',
-      'avatar': 'images/Ellipse 1652@3x.png',
+      'avatar': 'images/head_1.jpg',
       'lastMessage': 'Hey! How are you doing?',
       'time': '2 mins ago',
       'unread': 2,
@@ -18,7 +18,7 @@ class ChatLogic extends GetxController {
     },
     {
       'name': 'Michael Chen',
-      'avatar': 'images/Ellipse 1653@3x.png',
+      'avatar': 'images/head_2.jpg',
       'lastMessage': 'Let\'s meet up tomorrow!',
       'time': '1 hour ago',
       'unread': 0,
@@ -26,7 +26,7 @@ class ChatLogic extends GetxController {
     },
     {
       'name': 'Sarah Wilson',
-      'avatar': 'images/Ellipse 783@3x(1).png',
+      'avatar': 'images/head_3.jpg',
       'lastMessage': 'Thanks for the recommendation',
       'time': '3 hours ago',
       'unread': 1,
@@ -34,7 +34,7 @@ class ChatLogic extends GetxController {
     },
     {
       'name': 'David Lee',
-      'avatar': 'images/Ellipse 783@3x(2).png',
+      'avatar': 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
       'lastMessage': 'See you at the cafe',
       'time': '1 day ago',
       'unread': 0,

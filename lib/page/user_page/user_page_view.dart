@@ -88,8 +88,8 @@ class _UserPagePageState extends State<UserPagePage> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFBBDEFB),
                   shape: BoxShape.circle,
-                  image: const DecorationImage(
-                    image: AssetImage('images/Ellipse 783@3x.png'),
+                  image: DecorationImage(
+                    image: AssetImage(l.userAvatar),
                     fit: BoxFit.cover,
                   ),
                 ),

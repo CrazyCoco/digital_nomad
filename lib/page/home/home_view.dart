@@ -364,16 +364,19 @@ class _HomePageState extends State<HomePage> {
           Positioned(
             top: 12,
             left: 70,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.play_arrow,
-                size: 24,
-                color: Colors.white,
+            child: GestureDetector(
+              onTap: () => logic.onPlayVideo(index),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.play_arrow,
+                  size: 24,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

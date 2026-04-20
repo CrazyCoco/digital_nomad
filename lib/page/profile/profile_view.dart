@@ -90,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const CircleAvatar(
             radius: 40,
             backgroundColor: Color(0xFFBBDEFB),
-            backgroundImage: AssetImage('images/Ellipse 783@3x.png'),
+            backgroundImage: AssetImage('images/head_1.jpg'),
           ),
           const SizedBox(width: 16),
           Column(
@@ -288,7 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   child: Text(
-                    'Video(19)',
+                    'Video(${l.videos.length})',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -328,6 +328,150 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildPosts() {
+    return GetBuilder<ProfileLogic>(
+      builder: (l) {
+        if (l.contentTab == 0) {
+          // Video tab
+          return _buildVideoList();
+        } else {
+          // Photo tab
+          return _buildPhotoList();
+        }
+      },
+    );
+  }
+
+  Widget _buildVideoList() {
+    return GetBuilder<ProfileLogic>(
+      builder: (l) {
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: l.videos.length,
+          itemBuilder: (context, index) {
+            final video = l.videos[index];
+            return GestureDetector(
+              onTap: () => l.onVideoTap(index),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Thumbnail with play button
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                          child: Image.asset(
+                            video['thumbnail'],
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        // Play button overlay
+                        Positioned.fill(
+                          child: Center(
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.play_arrow,
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Duration badge
+                        Positioned(
+                          bottom: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              video['duration'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Video info
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            video['title'],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.remove_red_eye,
+                                size: 14,
+                                color: Colors.black54,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                video['views'],
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                video['time'],
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPhotoList() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -346,7 +490,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: const CircleAvatar(
                     radius: 24,
                     backgroundColor: Color(0xFFBBDEFB),
-                    backgroundImage: AssetImage('images/Ellipse 783@3x.png'),
+                    backgroundImage: AssetImage('images/head_1.jpg'),
                   ),
                 ),
                 SizedBox(width: 12),

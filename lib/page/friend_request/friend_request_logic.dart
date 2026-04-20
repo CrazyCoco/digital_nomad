@@ -8,28 +8,28 @@ class FriendRequestLogic extends GetxController {
       'bio': 'Travel enthusiast | Coffee lover',
       'mutualFriends': 5,
       'time': '2 hours ago',
-      'avatar': 'images/Ellipse 1652@3x.png',
+      'avatar': 'images/head_1.jpg',
     },
     {
       'name': 'Michael Chen',
       'bio': 'Photographer & Blogger',
       'mutualFriends': 12,
       'time': '5 hours ago',
-      'avatar': 'images/Ellipse 1653@3x.png',
+      'avatar': 'images/head_2.jpg',
     },
     {
       'name': 'Emily Davis',
       'bio': 'Digital nomad in Asia',
       'mutualFriends': 8,
       'time': '1 day ago',
-      'avatar': 'images/Ellipse 783@3x(1).png',
+      'avatar': 'images/head_3.jpg',
     },
     {
       'name': 'James Wilson',
       'bio': 'Software engineer | Hiker',
       'mutualFriends': 3,
       'time': '2 days ago',
-      'avatar': 'images/Ellipse 783@3x(2).png',
+      'avatar': 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
     },
   ];
   

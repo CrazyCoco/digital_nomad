@@ -21,6 +21,7 @@ import 'package:digital_nomad/page/topic/topic_view.dart';
 import 'package:digital_nomad/page/topic_detail/topic_detail_view.dart';
 import 'package:digital_nomad/page/user_page/user_page_view.dart';
 import 'package:digital_nomad/page/video_call/video_call_view.dart';
+import 'package:digital_nomad/page/video_player/video_player_view.dart';
 import 'package:get/get.dart';
 
 /// 应用路由名称常量
@@ -45,6 +46,7 @@ class AppRoutes {
   static const String roomChat = '/room_chat';
   static const String privateChat = '/private_chat';
   static const String videoCall = '/video_call';
+  static const String videoPlayer = '/video_player';
   static const String privacyPolicy = '/privacy_policy';
   static const String termsOfService = '/terms_of_service';
 }
@@ -78,6 +80,7 @@ class AppPages {
     GetPage(name: AppRoutes.roomChat, page: () => const RoomChatPage()),
     GetPage(name: AppRoutes.privateChat, page: () => const PrivateChatPage()),
     GetPage(name: AppRoutes.videoCall, page: () => const VideoCallPage()),
+    GetPage(name: AppRoutes.videoPlayer, page: () => const VideoPlayerPage()),
     GetPage(name: AppRoutes.privacyPolicy, page: () => const PrivacyPolicyPage()),
     GetPage(name: AppRoutes.termsOfService, page: () => const TermsOfServicePage()),
   ];
@@ -186,6 +189,11 @@ class NavigationUtil {
   /// 跳转到视频通话
   static void toVideoCall({String? userName}) {
     Get.toNamed(AppRoutes.videoCall, arguments: {'userName': userName});
+  }
+
+  /// 跳转到视频播放器
+  static void toVideoPlayer({required String videoPath}) {
+    Get.toNamed(AppRoutes.videoPlayer, arguments: {'videoPath': videoPath});
   }
 
   /// 跳转到隐私政策
