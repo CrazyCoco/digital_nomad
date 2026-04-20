@@ -108,7 +108,7 @@ class DataInitializer {
       Post(
         'post_1',
         'user_1',
-        'CoWork Space',
+        'Alice Johnson',
         userAvatar: 'images/head_1.jpg',
         description: 'Amazing colab space with fast wifi and great community',
         image: 'images/8952cc30813886ec84178206d8877d23.jpg',
@@ -126,7 +126,7 @@ class DataInitializer {
       Post(
         'post_2',
         'user_2',
-        'Digital Hub',
+        'Michael Chen',
         userAvatar: 'images/head_2.jpg',
         description: 'Perfect spot for remote work with meeting rooms',
         image: 'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
@@ -144,7 +144,7 @@ class DataInitializer {
       Post(
         'post_3',
         'user_3',
-        'Nomad Base',
+        'Sarah Wilson',
         userAvatar: 'images/head_3.jpg',
         description: 'Collaborative workspace with networking events',
         image: 'images/afc548276bf301d627730fb09e06be7f.jpg',
@@ -163,7 +163,7 @@ class DataInitializer {
       Post(
         'post_4',
         'user_4',
-        'Cali Vibes',
+        'David Lee',
         userAvatar: 'images/799ddffd8fbda40cd47b3d6887ed2d6c.jpg',
         description: 'Morning coffee routine at the beach cafe',
         image: 'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
@@ -181,7 +181,7 @@ class DataInitializer {
       Post(
         'post_5',
         'user_5',
-        'Beach Worker',
+        'Emma Davis',
         userAvatar: 'images/bf96945afb419442511807418b87dc16.jpg',
         description: 'Perfect workspace with ocean view today',
         image: 'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
@@ -199,7 +199,7 @@ class DataInitializer {
       Post(
         'post_6',
         'user_1',
-        'Cafe Hopper',
+        'Alice Johnson',
         userAvatar: 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
         description: 'Found this amazing hidden gem in Bali',
         image: 'images/17faa625fce16f5d297a2e29dd15f716.jpg',
@@ -218,7 +218,7 @@ class DataInitializer {
       Post(
         'post_7',
         'user_2',
-        'Mountain Nomad',
+        'Michael Chen',
         userAvatar: 'images/47bc300ec1f66b7e5ca75c05b341621e.jpg',
         description: 'Working from the mountains - best office ever!',
         image: 'images/175948fe83a531afbaf9a1bada957c27.jpg',
@@ -236,7 +236,7 @@ class DataInitializer {
       Post(
         'post_8',
         'user_3',
-        'Sunset Coder',
+        'Sarah Wilson',
         userAvatar: 'images/e8b24fae0b4d0815af9ddda8f1476ff8.jpg',
         description: 'Golden hour coding session by the beach',
         image: 'images/34a543da13c67f1fb1d6df299533f332.jpg',
@@ -254,7 +254,7 @@ class DataInitializer {
       Post(
         'post_9',
         'user_4',
-        'Travel Dev',
+        'David Lee',
         userAvatar: 'images/f04f96e8b6d909e39f132371413ae7d2.jpg',
         description: 'My mobile office setup for today',
         image: 'images/3d9b5922a426a5f4afa12fb082489111.jpg',

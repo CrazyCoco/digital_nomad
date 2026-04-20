@@ -268,7 +268,7 @@ class ExploreLogic extends GetxController {
   /// Navigate to user profile
   void onUserTap(String userName) {
     Get.toNamed(
-      '/userPage',
+      AppRoutes.userPage,
       arguments: {'userName': userName},
     )?.then((_) {
       // Refresh posts when returning from user page
