@@ -38,9 +38,9 @@ class _LoginIndexPageState extends State<LoginIndexPage> {
             children: [
               Image.asset(
                 'images/login_index_bg.png',
-                width: .infinity,
-                height: .infinity,
-                fit: .fill,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.fill,
               ),
               Column(
                 children: [

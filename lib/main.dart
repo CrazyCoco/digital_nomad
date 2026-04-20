@@ -6,8 +6,22 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'comm/data_initializer.dart';
+import 'comm/realm_service.dart';
+
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize GetStorage
   await GetStorage.init();
+  
+  // Initialize Realm database
+  final realmService = RealmService();
+  await realmService.init();
+  
+  // Initialize seed data
+  DataInitializer.initializeSeedData();
+  
   runApp(
     GetMaterialApp(
       builder: (context, child) {
