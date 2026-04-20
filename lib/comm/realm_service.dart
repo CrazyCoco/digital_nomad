@@ -5,10 +5,13 @@ import '../model/comment.dart';
 import '../model/chat_message.dart';
 import '../model/conversation.dart';
 import '../model/settings.dart';
+import '../model/follow.dart';
 
 class RealmService {
   static final RealmService _instance = RealmService._internal();
+
   factory RealmService() => _instance;
+
   RealmService._internal();
 
   late Realm _realm;
@@ -25,14 +28,15 @@ class RealmService {
       ChatMessage.schema,
       Conversation.schema,
       Settings.schema,
+      Follow.schema,
     ]);
 
     _realm = Realm(config);
     _isInitialized = true;
-    
+
     // 初始化默认设置
     _initDefaultSettings();
-    
+
     print('Realm database initialized successfully');
   }
 
@@ -119,9 +123,12 @@ class RealmService {
 
   /// 根据分类获取帖子
   List<Post> getPostsByCategory(String category) {
-    return _realm.all<Post>()
-        .where((p) => p.category == category)
-        .toList();
+    return _realm.all<Post>().where((p) => p.category == category).toList();
+  }
+
+  /// 根据用户ID获取帖子
+  List<Post> getPostsByUserId(String userId) {
+    return _realm.all<Post>().where((p) => p.userId == userId).toList();
   }
 
   /// 根据ID获取帖子
@@ -161,9 +168,7 @@ class RealmService {
 
   /// 获取帖子的评论
   List<Comment> getCommentsByPostId(String postId) {
-    return _realm.all<Comment>()
-        .where((c) => c.postId == postId)
-        .toList();
+    return _realm.all<Comment>().where((c) => c.postId == postId).toList();
   }
 
   /// 删除评论
@@ -187,7 +192,8 @@ class RealmService {
 
   /// 获取会话消息
   List<ChatMessage> getMessagesByConversation(String conversationId) {
-    return _realm.all<ChatMessage>()
+    return _realm
+        .all<ChatMessage>()
         .where((m) => m.conversationId == conversationId)
         .toList()
       ..sort((a, b) {
@@ -200,9 +206,10 @@ class RealmService {
 
   /// 标记消息为已读
   void markMessagesAsRead(String conversationId) {
-    final messages = _realm.all<ChatMessage>()
-        .where((m) => m.conversationId == conversationId && !m.isRead);
-    
+    final messages = _realm.all<ChatMessage>().where(
+      (m) => m.conversationId == conversationId && !m.isRead,
+    );
+
     _realm.write(() {
       for (final message in messages) {
         message.isRead = true;
@@ -286,7 +293,11 @@ class RealmService {
   // ==================== Batch Operations ====================
 
   /// 批量插入种子数据
-  void insertSeedData(List<User> users, List<Post> posts, List<Comment> comments) {
+  void insertSeedData(
+    List<User> users,
+    List<Post> posts,
+    List<Comment> comments,
+  ) {
     _realm.write(() {
       for (final user in users) {
         _realm.add(user, update: true);
@@ -308,7 +319,94 @@ class RealmService {
       _realm.deleteAll<Comment>();
       _realm.deleteAll<ChatMessage>();
       _realm.deleteAll<Conversation>();
+      _realm.deleteAll<Follow>();
       // 保留设置
     });
+  }
+
+  // ==================== Follow Operations ====================
+
+  /// 关注用户
+  void followUser(String followerId, String followingId) {
+    final followId = '${followerId}_$followingId';
+    final existingFollow = _realm.find<Follow>(followId);
+
+    if (existingFollow == null) {
+      _realm.write(() {
+        _realm.add(Follow(followId, followerId, followingId, DateTime.now()));
+
+        // 更新被关注者的粉丝数
+        final followingUser = _realm.find<User>(followingId);
+        if (followingUser != null) {
+          followingUser.followers = followingUser.followers + 1;
+        }
+
+        // 更新关注者的关注数
+        final followerUser = _realm.find<User>(followerId);
+        if (followerUser != null) {
+          followerUser.following = followerUser.following + 1;
+        }
+      });
+    }
+  }
+
+  /// 取消关注
+  void unfollowUser(String followerId, String followingId) {
+    final followId = '${followerId}_$followingId';
+    final follow = _realm.find<Follow>(followId);
+
+    if (follow != null) {
+      _realm.write(() {
+        _realm.delete(follow);
+
+        // 更新被关注者的粉丝数
+        final followingUser = _realm.find<User>(followingId);
+        if (followingUser != null && followingUser.followers > 0) {
+          followingUser.followers = followingUser.followers - 1;
+        }
+
+        // 更新关注者的关注数
+        final followerUser = _realm.find<User>(followerId);
+        if (followerUser != null && followerUser.following > 0) {
+          followerUser.following = followerUser.following - 1;
+        }
+      });
+    }
+  }
+
+  /// 检查是否已关注
+  bool isFollowing(String followerId, String followingId) {
+    final followId = '${followerId}_$followingId';
+    return _realm.find<Follow>(followId) != null;
+  }
+
+  /// 获取我关注的人
+  List<User> getFollowingUsers(String userId) {
+    final follows = _realm
+        .all<Follow>()
+        .where((f) => f.followerId == userId)
+        .toList();
+
+    return follows
+        .map((f) {
+          return _realm.find<User>(f.followingId);
+        })
+        .whereType<User>()
+        .toList();
+  }
+
+  /// 获取我的粉丝
+  List<User> getFollowersUsers(String userId) {
+    final follows = _realm
+        .all<Follow>()
+        .where((f) => f.followingId == userId)
+        .toList();
+
+    return follows
+        .map((f) {
+          return _realm.find<User>(f.followerId);
+        })
+        .whereType<User>()
+        .toList();
   }
 }

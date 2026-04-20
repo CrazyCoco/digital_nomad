@@ -1,13 +1,12 @@
 import 'dart:developer' as developer;
 
-import 'package:bmob_plugin/bmob/table/bmob_user.dart';
-import 'package:bmob_plugin/bmob/response/bmob_error.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../comm/realm_service.dart';
 import '../../routes/app_routes.dart';
 
 class SignInLogic extends GetxController {
@@ -57,43 +56,51 @@ class SignInLogic extends GetxController {
     password = passwordController.text;
     
     try {
-      // Create BmobUser instance
-      BmobUser bmobUser = BmobUser();
-      bmobUser.username = email;
-      bmobUser.password = password;
+      // Simple validation for demo account
+      // In production, this should be replaced with proper authentication
+      await Future.delayed(const Duration(milliseconds: 500));
       
-      // Login with Bmob
-      await bmobUser.login().then((BmobUser user) {
+      if (email == '123456@ss.com' && password == '1234567890') {
+        // Login successful with demo account
         EasyLoading.dismiss();
         
         developer.log('Login successful');
-        developer.log('User ID: ${user.getObjectId()}');
-        developer.log('Username: ${user.username ?? ""}');
+        developer.log('Email: $email');
         
         EasyLoading.showSuccess('Sign in successful');
         
         // Save login status
         final box = GetStorage();
         box.write('is_logged_in', true);
-        box.write('user_id', user.getObjectId());
-        box.write('username', user.username);
+        box.write('user_email', email);
+        
+        // Get user from Realm database
+        final realmService = RealmService();
+        final users = realmService.getAllUsers();
+        
+        // Use first user as current user (Alice Johnson)
+        if (users.isNotEmpty) {
+          final currentUser = users.first;
+          box.write('user_id', currentUser.id);
+          box.write('username', currentUser.name);
+          
+          developer.log('Current user: ${currentUser.name}');
+        }
         
         // Navigate to home page
         NavigationUtil.toMainTab();
-      }).catchError((error) {
+      } else {
+        // Invalid credentials
         EasyLoading.dismiss();
         
-        final bmobError = BmobError.convert(error);
-        final errorMessage = bmobError?.error ?? 'Login failed';
-        
-        developer.log('Login error: $errorMessage');
+        developer.log('Login failed: Invalid credentials');
         
         // Show error message
         showCupertinoDialog(
           context: Get.context!,
           builder: (context) => CupertinoAlertDialog(
             title: const Text('Login Failed'),
-            content: Text(errorMessage),
+            content: const Text('Invalid email or password.\n\nDemo Account:\nEmail: 123456@ss.com\nPassword: 1234567890'),
             actions: [
               CupertinoDialogAction(
                 isDefaultAction: true,
@@ -103,7 +110,7 @@ class SignInLogic extends GetxController {
             ],
           ),
         );
-      });
+      }
     } catch (e) {
       EasyLoading.dismiss();
       developer.log('Exception: $e');

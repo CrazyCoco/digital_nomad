@@ -1,68 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../../comm/realm_service.dart';
 import '../../routes/app_routes.dart';
 
 class ExploreLogic extends GetxController {
+  final RealmService _realmService = RealmService();
+  
   // Tab controller
   int selectedTab = 0;
   
   // Popular/Following tab
   int contentTab = 0;
   
-  // Hot topics
+  // Hot topics - 热门话题
   final List<Map<String, dynamic>> hotTopics = [
     {
       'title': '#Nomad Life Stories & Experiences',
-      'views': '12739',
+      'views': '12.7K',
       'color': const Color(0xFFB3E5FC),
-      'image': 'images/Group 1000009700@3x(3).png',
+      'image': 'images/8952cc30813886ec84178206d8877d23.jpg',
     },
     {
       'title': '#Gear Talk Essentials',
-      'views': '12739',
+      'views': '8.5K',
       'color': const Color(0xFFFFCCBC),
-      'image': 'images/Group 1000009700@3x(4).png',
+      'image': 'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
     },
     {
       'title': '#Workspace Hacks & Setup Ideas',
-      'views': '12739',
+      'views': '15.2K',
       'color': const Color(0xFFDCEDC8),
-      'image': 'images/Group 1000009700@3x(5).png',
+      'image': 'images/afc548276bf301d627730fb09e06be7f.jpg',
     },
     {
       'title': '#Travel Tips Guides',
-      'views': '12739',
+      'views': '20.1K',
       'color': const Color(0xFFE1BEE7),
-      'image': 'images/Group 1000009700@3x(6).png',
+      'image': 'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
+    },
+    {
+      'title': '#Remote Work Best Practices',
+      'views': '9.8K',
+      'color': const Color(0xFFFFF9C4),
+      'image': 'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
     },
   ];
   
-  // Posts
-  final List<Map<String, dynamic>> posts = [
-    {
-      'user': 'Danny',
-      'time': '11:00AM',
-      'content': 'How to set boundaries with a clingy partner without hurting them?How to set boundaries with a clingy partner without hurting them...',
-      'views': '12739',
-      'likes': 24,
-      'liked': true,
+  // Posts loaded from Realm
+  List<Map<String, dynamic>> posts = [];
+  
+  @override
+  void onInit() {
+    super.onInit();
+    loadPosts();
+  }
+  
+  /// Load posts from Realm
+  void loadPosts() {
+    final allPosts = _realmService.getAllPosts();
+    
+    posts = allPosts.map((post) => {
+      'id': post.id,
+      'user': post.userName,
+      'userId': post.userId,
+      'time': _formatTime(post.createdAt),
+      'content': post.description ?? 'No description',
+      'views': '${(post.likes * 10 + post.comments * 5)}',
+      'likes': post.likes,
+      'liked': post.isLiked,
       'following': false,
-      'avatar': 'images/Ellipse 783@3x(8).png',
-      'images': ['images/Group 1000009700@3x(6).png', 'images/Group 1000009700@3x(7).png'],
-    },
-    {
-      'user': 'Danny',
-      'time': '11:00AM',
-      'content': 'How to set boundaries with a clingy partner without hurting them?How to set boundaries with a clingy partner without hurting them...',
-      'views': '12739',
-      'likes': 24,
-      'liked': false,
-      'following': true,
-      'avatar': 'images/Ellipse 783@3x(1).png',
-      'images': ['images/Group 1000009700@3x(8).png'],
-    },
-  ];
+      'avatar': post.userAvatar ?? 'images/head_1.jpg',
+      'images': [post.image ?? ''],
+      'category': post.category,
+    }).toList();
+    
+    update();
+  }
+  
+  /// Format DateTime to readable string
+  String _formatTime(DateTime? dateTime) {
+    if (dateTime == null) return 'Just now';
+    
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
+  }
   
   @override
   void onReady() {
@@ -88,19 +119,46 @@ class ExploreLogic extends GetxController {
   
   /// Toggle follow
   void toggleFollow(int postIndex) {
-    posts[postIndex]['following'] = !posts[postIndex]['following'];
-    update();
+    if (postIndex >= 0 && postIndex < posts.length) {
+      final box = GetStorage();
+      final currentUserId = box.read('user_id') as String?;
+      final targetUserId = posts[postIndex]['userId'] as String?;
+      
+      if (currentUserId != null && targetUserId != null) {
+        final isCurrentlyFollowing = posts[postIndex]['following'];
+        
+        if (isCurrentlyFollowing) {
+          _realmService.unfollowUser(currentUserId, targetUserId);
+        } else {
+          _realmService.followUser(currentUserId, targetUserId);
+        }
+        
+        posts[postIndex]['following'] = !isCurrentlyFollowing;
+        update();
+      }
+    }
   }
   
   /// Toggle like
   void toggleLike(int postIndex) {
-    posts[postIndex]['liked'] = !posts[postIndex]['liked'];
-    if (posts[postIndex]['liked']) {
-      posts[postIndex]['likes']++;
-    } else {
-      posts[postIndex]['likes']--;
+    if (postIndex >= 0 && postIndex < posts.length) {
+      final post = posts[postIndex];
+      final postId = post['id'] as String?;
+      
+      if (postId != null) {
+        // Update in Realm
+        _realmService.toggleLike(postId);
+        
+        // Update local state
+        post['liked'] = !post['liked'];
+        if (post['liked']) {
+          post['likes']++;
+        } else {
+          post['likes']--;
+        }
+        update();
+      }
     }
-    update();
   }
   
   void onTopicTap() {

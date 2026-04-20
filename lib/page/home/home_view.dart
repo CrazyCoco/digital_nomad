@@ -94,10 +94,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    '😊',
-                    style: const TextStyle(fontSize: 18),
-                  ),
+                  Text('😊', style: const TextStyle(fontSize: 18)),
                 ],
               ),
             ),
@@ -183,55 +180,105 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 90,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: logic.suggestedUsers.length,
-            itemBuilder: (context, index) {
-              final user = logic.suggestedUsers[index];
-              return Container(
-                width: 80,
-                margin: const EdgeInsets.only(right: 12),
-                child: Column(
-                  children: [
-                    Stack(
+          height: 125,
+          child: GetBuilder<HomeLogic>(
+            builder: (l) {
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: l.suggestedUsers.length,
+                itemBuilder: (context, index) {
+                  final user = l.suggestedUsers[index];
+                  return Container(
+                    width: 100,
+                    margin: const EdgeInsets.only(right: 12),
+                    child: Column(
                       children: [
-                        GestureDetector(
-                          onTap: () => NavigationUtil.toUserPage(userName: user['name']),
-                          child: CircleAvatar(
-                            radius: 35,
-                            backgroundImage: user['avatar'] != null
-                                ? AssetImage(user['avatar'])
-                                : null,
-                            backgroundColor: const Color(0xFFBBDEFB),
-                            child: user['avatar'] == null
-                                ? const Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: Color(0xFF2196F3),
-                                  )
-                                : null,
-                          ),
+                        Stack(
+                          children: [
+                            GestureDetector(
+                              onTap: () => NavigationUtil.toUserPage(
+                                userName: user['name'],
+                              ),
+                              child: CircleAvatar(
+                                radius: 35,
+                                backgroundImage: user['avatar'] != null
+                                    ? AssetImage(user['avatar'])
+                                    : null,
+                                backgroundColor: const Color(0xFFBBDEFB),
+                                child: user['avatar'] == null
+                                    ? const Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: Color(0xFF2196F3),
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            if (user['online'])
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF76FF03),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        if (user['online'])
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              width: 16,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF76FF03),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
+                        const SizedBox(height: 6),
+                        Text(
+                          user['name'],
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () => l.toggleFollowUser(index),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: user['isFollowing']
+                                  ? Colors.black
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: user['isFollowing']
+                                    ? Colors.black
+                                    : Colors.black26,
+                              ),
+                            ),
+                            child: Text(
+                              user['isFollowing'] ? 'Following' : 'Follow',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: user['isFollowing']
+                                    ? Colors.white
+                                    : Colors.black,
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  );
+                },
               );
             },
           ),
@@ -267,7 +314,10 @@ class _HomePageState extends State<HomePage> {
                     onTap: () => l.selectCategory(index),
                     child: Container(
                       margin: const EdgeInsets.only(right: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: l.selectedCategory == index
                             ? const Color(0xFFBBDEFB)
@@ -329,10 +379,7 @@ class _HomePageState extends State<HomePage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: post['image'] != null
-                  ? Image.asset(
-                      post['image'],
-                      fit: BoxFit.cover,
-                    )
+                  ? Image.asset(post['image'], fit: BoxFit.cover)
                   : Container(
                       color: const Color(0xFFE1F5FE),
                       child: Center(
@@ -436,7 +483,8 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => NavigationUtil.toUserPage(userName: post['user']),
+                  onTap: () =>
+                      NavigationUtil.toUserPage(userName: post['user']),
                   child: CircleAvatar(
                     radius: 16,
                     backgroundImage: post['avatar'] != null

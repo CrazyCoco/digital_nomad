@@ -483,32 +483,61 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () => NavigationUtil.toUserPage(userName: 'Danny'),
-                  child: const CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Color(0xFFBBDEFB),
-                    backgroundImage: AssetImage('images/head_1.jpg'),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            GetBuilder<ProfileLogic>(
+              builder: (l) {
+                if (l.posts.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                
+                final post = l.posts[0]; // 显示第一个帖子
+                return Row(
                   children: [
-                    Text('Danny', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('11:00AM', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                    GestureDetector(
+                      onTap: () => l.onPostAuthorTap(0),
+                      child: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: const Color(0xFFBBDEFB),
+                        backgroundImage: post['avatar'] != null
+                            ? AssetImage(post['avatar'])
+                            : null,
+                        child: post['avatar'] == null
+                            ? const Icon(Icons.person, size: 30, color: Color(0xFF2196F3))
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          post['user'] ?? 'User',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          post['time'] ?? '',
+                          style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        ),
+                      ],
+                    ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
             const SizedBox(height: 12),
-            const Text(
-              'How to set boundaries with a clingy partner without hurting them?How to set boundaries with a clingy partner without hurting them...',
-              style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            GetBuilder<ProfileLogic>(
+              builder: (l) {
+                if (l.posts.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                
+                final post = l.posts[0];
+                return Text(
+                  post['content'] ?? '',
+                  style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
             ),
             const SizedBox(height: 12),
             Row(

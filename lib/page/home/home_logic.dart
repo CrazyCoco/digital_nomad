@@ -1,8 +1,12 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../../comm/realm_service.dart';
 import '../../routes/app_routes.dart';
 
 class HomeLogic extends GetxController {
+  final RealmService _realmService = RealmService();
+  
   // Tab controller
   int selectedTab = 0;
   
@@ -10,135 +14,88 @@ class HomeLogic extends GetxController {
   final List<String> categories = ['Colab', 'Cafe', 'Outdoor'];
   int selectedCategory = 0;
   
-  // Mock data for "You might like"
-  final List<Map<String, dynamic>> suggestedUsers = [
-    {'name': 'User 1', 'online': true, 'avatar': 'images/head_1.jpg'},
-    {'name': 'User 2', 'online': false, 'avatar': 'images/head_2.jpg'},
-    {'name': 'User 3', 'online': true, 'avatar': 'images/head_3.jpg'},
-    {'name': 'User 4', 'online': false, 'avatar': 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg'},
-    {'name': 'User 5', 'online': false, 'avatar': 'images/47bc300ec1f66b7e5ca75c05b341621e.jpg'},
-  ];
+  // Suggested users loaded from Realm
+  List<Map<String, dynamic>> suggestedUsers = [];
   
-  // Mock data for posts by category
-  final Map<String, List<Map<String, dynamic>>> postsByCategory = {
-    'Colab': [
-      {
-        'user': 'CoWork Space',
-        'time': '10:30AM',
-        'description': 'Amazing colab space with fast wifi and great community',
-        'likes': 45,
-        'liked': false,
-        'weather': 'sunny',
-        'image': 'images/8952cc30813886ec84178206d8877d23.jpg',
-        'avatar': 'images/head_1.jpg',
-        'isVideo': true,
-        'videoPath': 'images/100cbbc25bf271dc459d54e00fc218e9_720w.mp4',
-      },
-      {
-        'user': 'Digital Hub',
-        'time': '2:15PM',
-        'description': 'Perfect spot for remote work with meeting rooms',
-        'likes': 62,
-        'liked': true,
-        'weather': 'cloudy',
-        'image': 'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
-        'avatar': 'images/head_2.jpg',
-        'isVideo': true,
-        'videoPath': 'images/132d3ac74640afb9545dc9e51ce8e9df.mp4',
-      },
-      {
-        'user': 'Nomad Base',
-        'time': '4:00PM',
-        'description': 'Collaborative workspace with networking events',
-        'likes': 38,
-        'liked': false,
-        'weather': 'sunny',
-        'image': 'images/afc548276bf301d627730fb09e06be7f.jpg',
-        'avatar': 'images/head_3.jpg',
-        'isVideo': true,
-        'videoPath': 'images/1a6954309c550d60b48b9bd001b0f370_720w.mp4',
-      },
-    ],
-    'Cafe': [
-      {
-        'user': 'Cali Vibes',
-        'time': '11:00AM',
-        'description': 'Morning coffee routine at the beach cafe',
-        'likes': 38,
-        'liked': true,
-        'weather': 'sunny',
-        'image': 'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
-        'avatar': 'images/799ddffd8fbda40cd47b3d6887ed2d6c.jpg',
-        'isVideo': true,
-        'videoPath': 'images/21c7b75472e945ffb863608cdef26353_t4.mp4',
-      },
-      {
-        'user': 'Beach Worker',
-        'time': '2:30PM',
-        'description': 'Perfect workspace with ocean view today',
-        'likes': 25,
-        'liked': false,
-        'weather': 'sunny',
-        'image': 'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
-        'avatar': 'images/bf96945afb419442511807418b87dc16.jpg',
-        'isVideo': true,
-        'videoPath': 'images/2fb94a98f92223b765c6adf89a701950.mp4',
-      },
-      {
-        'user': 'Cafe Hopper',
-        'time': '4:45PM',
-        'description': 'Found this amazing hidden gem in Bali',
-        'likes': 67,
-        'liked': true,
-        'weather': 'sunny',
-        'image': 'images/17faa625fce16f5d297a2e29dd15f716.jpg',
-        'avatar': 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
-        'isVideo': true,
-        'videoPath': 'images/3e024ae4241ef369444b673969845350_t1.mp4',
-      },
-    ],
-    'Outdoor': [
-      {
-        'user': 'Mountain Nomad',
-        'time': '9:15AM',
-        'description': 'Working from the mountains - best office ever!',
-        'likes': 52,
-        'liked': false,
-        'weather': 'cloudy',
-        'image': 'images/175948fe83a531afbaf9a1bada957c27.jpg',
-        'avatar': 'images/47bc300ec1f66b7e5ca75c05b341621e.jpg',
-        'isVideo': true,
-        'videoPath': 'images/65dbfdc6ee1b1a98375af7136ee1f389_540w.mp4',
-      },
-      {
-        'user': 'Sunset Coder',
-        'time': '6:30PM',
-        'description': 'Golden hour coding session by the beach',
-        'likes': 89,
-        'liked': false,
-        'weather': 'sunny',
-        'image': 'images/34a543da13c67f1fb1d6df299533f332.jpg',
-        'avatar': 'images/e8b24fae0b4d0815af9ddda8f1476ff8.jpg',
-        'isVideo': true,
-        'videoPath': 'images/70895d0ffb161f2436a84572c944ea08.mp4',
-      },
-      {
-        'user': 'Travel Dev',
-        'time': '10:00AM',
-        'description': 'My mobile office setup for today',
-        'likes': 43,
-        'liked': false,
-        'weather': 'partly_cloudy',
-        'image': 'images/3d9b5922a426a5f4afa12fb082489111.jpg',
-        'avatar': 'images/f04f96e8b6d909e39f132371413ae7d2.jpg',
-        'isVideo': true,
-        'videoPath': 'images/9649291a6f97744972f96b52aa154b66_720w.mp4',
-      },
-    ],
-  };
+  // Posts loaded from Realm
+  List<Map<String, dynamic>> posts = [];
   
-  // Current posts based on selected category
-  List<Map<String, dynamic>> get posts => postsByCategory[categories[selectedCategory]] ?? [];
+  @override
+  void onInit() {
+    super.onInit();
+    loadSuggestedUsers();
+    loadPosts();
+  }
+  
+  /// Load suggested users from Realm
+  void loadSuggestedUsers() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId == null) {
+      return;
+    }
+    
+    // Get all users except current user
+    final allUsers = _realmService.getAllUsers();
+    final otherUsers = allUsers.where((u) => u.id != currentUserId).toList();
+    
+    // Check follow status for each user
+    suggestedUsers = otherUsers.map((user) {
+      final isFollowing = _realmService.isFollowing(currentUserId, user.id);
+      return {
+        'id': user.id,
+        'name': user.name,
+        'online': user.isOnline,
+        'avatar': user.avatar ?? 'images/head_1.jpg',
+        'bio': user.bio ?? '',
+        'isFollowing': isFollowing,
+        'followers': user.followers,
+      };
+    }).toList();
+    
+    update();
+  }
+  
+  /// Load posts from Realm database
+  void loadPosts() {
+    final category = categories[selectedCategory];
+    final realmPosts = _realmService.getPostsByCategory(category);
+    
+    posts = realmPosts.map((post) => {
+      'id': post.id,
+      'user': post.userName,
+      'userId': post.userId,
+      'time': _formatTime(post.createdAt),
+      'description': post.description ?? '',
+      'likes': post.likes,
+      'liked': post.isLiked,
+      'weather': post.weather ?? 'sunny',
+      'image': post.image ?? '',
+      'avatar': post.userAvatar ?? 'images/head_1.jpg',
+      'isVideo': post.isVideo,
+      'videoPath': post.videoPath,
+      'category': post.category,
+    }).toList();
+    
+    update();
+  }
+  
+  /// Format DateTime to readable string
+  String _formatTime(DateTime? dateTime) {
+    if (dateTime == null) return 'Just now';
+    
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inHours < 1) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
+  }
   
   @override
   void onReady() {
@@ -153,7 +110,7 @@ class HomeLogic extends GetxController {
   /// Select category
   void selectCategory(int index) {
     selectedCategory = index;
-    update();
+    loadPosts(); // Reload posts from Realm when category changes
   }
   
   /// Get current category name
@@ -167,15 +124,23 @@ class HomeLogic extends GetxController {
   
   /// Toggle like
   void toggleLike(int postIndex) {
-    final currentPosts = posts;
-    if (postIndex >= 0 && postIndex < currentPosts.length) {
-      currentPosts[postIndex]['liked'] = !currentPosts[postIndex]['liked'];
-      if (currentPosts[postIndex]['liked']) {
-        currentPosts[postIndex]['likes']++;
-      } else {
-        currentPosts[postIndex]['likes']--;
+    if (postIndex >= 0 && postIndex < posts.length) {
+      final post = posts[postIndex];
+      final postId = post['id'] as String?;
+      
+      if (postId != null) {
+        // Update in Realm
+        _realmService.toggleLike(postId);
+        
+        // Update local state
+        post['liked'] = !post['liked'];
+        if (post['liked']) {
+          post['likes']++;
+        } else {
+          post['likes']--;
+        }
+        update();
       }
-      update();
     }
   }
   
@@ -208,6 +173,33 @@ class HomeLogic extends GetxController {
         reportedUserName: post['user'] ?? 'Unknown',
         reportedContent: post['description'] ?? '',
       );
+    }
+  }
+  
+  /// Toggle follow for suggested user
+  void toggleFollowUser(int userIndex) {
+    if (userIndex >= 0 && userIndex < suggestedUsers.length) {
+      final box = GetStorage();
+      final currentUserId = box.read('user_id') as String?;
+      
+      if (currentUserId == null) {
+        return;
+      }
+      
+      final user = suggestedUsers[userIndex];
+      final targetUserId = user['id'] as String;
+      
+      if (user['isFollowing']) {
+        // Unfollow
+        _realmService.unfollowUser(currentUserId, targetUserId);
+        user['isFollowing'] = false;
+      } else {
+        // Follow
+        _realmService.followUser(currentUserId, targetUserId);
+        user['isFollowing'] = true;
+      }
+      
+      update();
     }
   }
 }

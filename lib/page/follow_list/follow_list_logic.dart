@@ -1,32 +1,67 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+
+import '../../comm/realm_service.dart';
+import '../../routes/app_routes.dart';
 
 class FollowListLogic extends GetxController {
+  final RealmService _realmService = RealmService();
+  
   // 0: Following, 1: Followers, 2: Friends
   int selectedTab = 0;
   final List<String> tabs = ['Following', 'Followers', 'Friends'];
   
-  // 关注列表
-  List<Map<String, dynamic>> followingList = [
-    {'name': 'Alice Johnson', 'bio': 'Travel blogger', 'isFollowing': true, 'avatar': 'images/head_1.jpg'},
-    {'name': 'Bob Smith', 'bio': 'Photographer', 'isFollowing': true, 'avatar': 'images/head_2.jpg'},
-    {'name': 'Carol White', 'bio': 'Digital nomad', 'isFollowing': false, 'avatar': 'images/head_3.jpg'},
-    {'name': 'David Brown', 'bio': 'Software engineer', 'isFollowing': true, 'avatar': 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg'},
-  ];
+  // Data lists
+  List<Map<String, dynamic>> followingList = [];
+  List<Map<String, dynamic>> followersList = [];
+  List<Map<String, dynamic>> friendsList = [];
   
-  // 粉丝列表
-  List<Map<String, dynamic>> followersList = [
-    {'name': 'Emma Davis', 'bio': 'Content creator', 'isFollowing': false, 'avatar': 'images/47bc300ec1f66b7e5ca75c05b341621e.jpg'},
-    {'name': 'Frank Miller', 'bio': 'Designer', 'isFollowing': true, 'avatar': 'images/799ddffd8fbda40cd47b3d6887ed2d6c.jpg'},
-    {'name': 'Grace Wilson', 'bio': 'Writer', 'isFollowing': false, 'avatar': 'images/bf96945afb419442511807418b87dc16.jpg'},
-  ];
+  @override
+  void onInit() {
+    super.onInit();
+    loadData();
+  }
   
-  // 朋友列表
-  List<Map<String, dynamic>> friendsList = [
-    {'name': 'Henry Moore', 'bio': 'Entrepreneur', 'online': true, 'avatar': 'images/e8b24fae0b4d0815af9ddda8f1476ff8.jpg'},
-    {'name': 'Iris Taylor', 'bio': 'Artist', 'online': false, 'avatar': 'images/f04f96e8b6d909e39f132371413ae7d2.jpg'},
-    {'name': 'Jack Anderson', 'bio': 'Developer', 'online': true, 'avatar': 'images/head_1.jpg'},
-    {'name': 'Kate Thomas', 'bio': 'Marketer', 'online': false, 'avatar': 'images/head_2.jpg'},
-  ];
+  /// Load data from Realm
+  void loadData() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId == null) {
+      return;
+    }
+    
+    // Load following users
+    final followingUsers = _realmService.getFollowingUsers(currentUserId);
+    followingList = followingUsers.map((user) => {
+      'id': user.id,
+      'name': user.name,
+      'bio': user.bio ?? 'No bio',
+      'isFollowing': true,
+      'avatar': user.avatar ?? 'images/head_1.jpg',
+    }).toList();
+    
+    // Load followers users
+    final followersUsers = _realmService.getFollowersUsers(currentUserId);
+    followersList = followersUsers.map((user) {
+      // Check if current user is following back
+      final isFollowingBack = _realmService.isFollowing(currentUserId, user.id);
+      return {
+        'id': user.id,
+        'name': user.name,
+        'bio': user.bio ?? 'No bio',
+        'isFollowing': isFollowingBack,
+        'avatar': user.avatar ?? 'images/head_1.jpg',
+      };
+    }).toList();
+    
+    // Load friends (mutual follows)
+    friendsList = followingList.where((following) {
+      return followersList.any((follower) => follower['id'] == following['id']);
+    }).toList();
+    
+    update();
+  }
   
   void selectTab(int index) {
     selectedTab = index;
@@ -34,17 +69,55 @@ class FollowListLogic extends GetxController {
   }
   
   void toggleFollow(int index) {
-    if (selectedTab == 0) {
-      followingList[index]['isFollowing'] = !followingList[index]['isFollowing'];
-    } else if (selectedTab == 1) {
-      followersList[index]['isFollowing'] = !followersList[index]['isFollowing'];
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId == null) {
+      return;
     }
+    
+    if (selectedTab == 0) {
+      // Unfollow from Following tab
+      final user = followingList[index];
+      final targetUserId = user['id'] as String;
+      
+      _realmService.unfollowUser(currentUserId, targetUserId);
+      followingList.removeAt(index);
+      
+      // Also remove from friends if exists
+      friendsList.removeWhere((friend) => friend['id'] == targetUserId);
+    } else if (selectedTab == 1) {
+      // Follow back from Followers tab
+      final user = followersList[index];
+      final targetUserId = user['id'] as String;
+      
+      if (user['isFollowing']) {
+        // Unfollow
+        _realmService.unfollowUser(currentUserId, targetUserId);
+        user['isFollowing'] = false;
+        
+        // Remove from friends
+        friendsList.removeWhere((friend) => friend['id'] == targetUserId);
+      } else {
+        // Follow back
+        _realmService.followUser(currentUserId, targetUserId);
+        user['isFollowing'] = true;
+        
+        // Add to friends
+        friendsList.add({
+          'id': targetUserId,
+          'name': user['name'],
+          'bio': user['bio'],
+          'avatar': user['avatar'],
+        });
+      }
+    }
+    
     update();
   }
   
   void onUserTap(String name) {
-    // TODO: Navigate to user profile
-    print('Tap on user: $name');
+    NavigationUtil.toUserPage(userName: name);
   }
   
   void onBack() {

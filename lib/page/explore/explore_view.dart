@@ -490,18 +490,19 @@ class _ExplorePageState extends State<ExplorePage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(
-                          Icons.favorite_border,
+                          post['liked'] ? Icons.favorite : Icons.favorite_border,
                           size: 18,
-                          color: Colors.black54,
+                          color: post['liked'] ? Colors.red : Colors.black54,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          '24',
+                          '${post['likes']}',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
+                            color: post['liked'] ? Colors.red : Colors.black54,
                           ),
                         ),
                       ],
