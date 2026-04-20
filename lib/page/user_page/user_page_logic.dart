@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class UserPageLogic extends GetxController {
   // 用户信息
   String userName = 'John Doe';
@@ -76,8 +78,10 @@ class UserPageLogic extends GetxController {
   }
   
   void onMessage() {
-    // TODO: Navigate to chat
-    print('Send message');
+    NavigationUtil.toPrivateChat(
+      userName: userName,
+      userAvatar: '',
+    );
   }
   
   void onMoreOptions() {

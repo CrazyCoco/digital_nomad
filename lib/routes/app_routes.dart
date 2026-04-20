@@ -9,11 +9,14 @@ import 'package:digital_nomad/page/login_index/login_index_view.dart';
 import 'package:digital_nomad/page/main_tab/main_tab_view.dart';
 import 'package:digital_nomad/page/onboarding/onboarding_view.dart';
 import 'package:digital_nomad/page/post_detail/post_detail_view.dart';
+import 'package:digital_nomad/page/privacy_policy/privacy_policy_view.dart';
+import 'package:digital_nomad/page/private_chat/private_chat_view.dart';
 import 'package:digital_nomad/page/recharge/recharge_view.dart';
 import 'package:digital_nomad/page/report/report_view.dart';
 import 'package:digital_nomad/page/room_chat/room_chat_view.dart';
 import 'package:digital_nomad/page/settings/settings_view.dart';
 import 'package:digital_nomad/page/sign_in/sign_in_view.dart';
+import 'package:digital_nomad/page/terms_of_service/terms_of_service_view.dart';
 import 'package:digital_nomad/page/topic/topic_view.dart';
 import 'package:digital_nomad/page/topic_detail/topic_detail_view.dart';
 import 'package:digital_nomad/page/user_page/user_page_view.dart';
@@ -40,88 +43,43 @@ class AppRoutes {
   static const String recharge = '/recharge';
   static const String settings = '/settings';
   static const String roomChat = '/room_chat';
+  static const String privateChat = '/private_chat';
   static const String videoCall = '/video_call';
+  static const String privacyPolicy = '/privacy_policy';
+  static const String termsOfService = '/terms_of_service';
 }
 
 /// 路由页面配置
 class AppPages {
   static final List<GetPage> routes = [
-    GetPage(
-      name: AppRoutes.onboarding,
-      page: () => const OnboardingPage(),
-    ),
-    GetPage(
-      name: AppRoutes.loginIndex,
-      page: () => const LoginIndexPage(),
-    ),
-    GetPage(
-      name: AppRoutes.signIn,
-      page: () => const SignInPage(),
-    ),
+    GetPage(name: AppRoutes.onboarding, page: () => const OnboardingPage()),
+    GetPage(name: AppRoutes.loginIndex, page: () => const LoginIndexPage()),
+    GetPage(name: AppRoutes.signIn, page: () => const SignInPage()),
     GetPage(
       name: AppRoutes.createAccount,
       page: () => const CreateAccountPage(),
     ),
-    GetPage(
-      name: AppRoutes.mainTab,
-      page: () => const MainTabPage(),
-    ),
-    GetPage(
-      name: AppRoutes.userPage,
-      page: () => const UserPagePage(),
-    ),
-    GetPage(
-      name: AppRoutes.editProfile,
-      page: () => const EditProfilePage(),
-    ),
-    GetPage(
-      name: AppRoutes.followList,
-      page: () => const FollowListPage(),
-    ),
+    GetPage(name: AppRoutes.mainTab, page: () => const MainTabPage()),
+    GetPage(name: AppRoutes.userPage, page: () => const UserPagePage()),
+    GetPage(name: AppRoutes.editProfile, page: () => const EditProfilePage()),
+    GetPage(name: AppRoutes.followList, page: () => const FollowListPage()),
     GetPage(
       name: AppRoutes.friendRequest,
       page: () => const FriendRequestPage(),
     ),
-    GetPage(
-      name: AppRoutes.blacklist,
-      page: () => const BlacklistPage(),
-    ),
-    GetPage(
-      name: AppRoutes.report,
-      page: () => const ReportPage(),
-    ),
-    GetPage(
-      name: AppRoutes.postDetail,
-      page: () => const PostDetailPage(),
-    ),
-    GetPage(
-      name: AppRoutes.topic,
-      page: () => const TopicPage(),
-    ),
-    GetPage(
-      name: AppRoutes.topicDetail,
-      page: () => const TopicDetailPage(),
-    ),
-    GetPage(
-      name: AppRoutes.likeRanking,
-      page: () => const LikeRankingPage(),
-    ),
-    GetPage(
-      name: AppRoutes.recharge,
-      page: () => const RechargePage(),
-    ),
-    GetPage(
-      name: AppRoutes.settings,
-      page: () => const SettingsPage(),
-    ),
-    GetPage(
-      name: AppRoutes.roomChat,
-      page: () => const RoomChatPage(),
-    ),
-    GetPage(
-      name: AppRoutes.videoCall,
-      page: () => const VideoCallPage(),
-    ),
+    GetPage(name: AppRoutes.blacklist, page: () => const BlacklistPage()),
+    GetPage(name: AppRoutes.report, page: () => const ReportPage()),
+    GetPage(name: AppRoutes.postDetail, page: () => const PostDetailPage()),
+    GetPage(name: AppRoutes.topic, page: () => const TopicPage()),
+    GetPage(name: AppRoutes.topicDetail, page: () => const TopicDetailPage()),
+    GetPage(name: AppRoutes.likeRanking, page: () => const LikeRankingPage()),
+    GetPage(name: AppRoutes.recharge, page: () => const RechargePage()),
+    GetPage(name: AppRoutes.settings, page: () => const SettingsPage()),
+    GetPage(name: AppRoutes.roomChat, page: () => const RoomChatPage()),
+    GetPage(name: AppRoutes.privateChat, page: () => const PrivateChatPage()),
+    GetPage(name: AppRoutes.videoCall, page: () => const VideoCallPage()),
+    GetPage(name: AppRoutes.privacyPolicy, page: () => const PrivacyPolicyPage()),
+    GetPage(name: AppRoutes.termsOfService, page: () => const TermsOfServicePage()),
   ];
 }
 
@@ -217,13 +175,34 @@ class NavigationUtil {
     Get.toNamed(AppRoutes.roomChat, arguments: {'roomName': roomName});
   }
 
+  /// 跳转到私聊
+  static void toPrivateChat({required String userName, String userAvatar = ''}) {
+    Get.toNamed(
+      AppRoutes.privateChat,
+      arguments: {'userName': userName, 'userAvatar': userAvatar},
+    );
+  }
+
   /// 跳转到视频通话
   static void toVideoCall({String? userName}) {
     Get.toNamed(AppRoutes.videoCall, arguments: {'userName': userName});
   }
 
+  /// 跳转到隐私政策
+  static void toPrivacyPolicy() {
+    Get.toNamed(AppRoutes.privacyPolicy);
+  }
+
+  /// 跳转到用户协议
+  static void toTermsOfService() {
+    Get.toNamed(AppRoutes.termsOfService);
+  }
+
   /// 显示加好友弹窗
-  static void showAddFriendDialog({required String userName, String userAvatar = ''}) {
+  static void showAddFriendDialog({
+    required String userName,
+    String userAvatar = '',
+  }) {
     AddFriendDialog.show(userName: userName, userAvatar: userAvatar);
   }
 

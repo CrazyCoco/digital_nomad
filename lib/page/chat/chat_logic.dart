@@ -1,15 +1,55 @@
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class ChatLogic extends GetxController {
-  int selectedTab = 2;
+  int selectedTab = 0; // 0: Private Chats, 1: Room Chats
+  final List<String> tabs = ['Chats', 'Rooms'];
   
+  // 私聊列表
+  final List<Map<String, dynamic>> privateChats = [
+    {
+      'name': 'Alice Johnson',
+      'avatar': 'images/Ellipse 1652@3x.png',
+      'lastMessage': 'Hey! How are you doing?',
+      'time': '2 mins ago',
+      'unread': 2,
+      'online': true,
+    },
+    {
+      'name': 'Michael Chen',
+      'avatar': 'images/Ellipse 1653@3x.png',
+      'lastMessage': 'Let\'s meet up tomorrow!',
+      'time': '1 hour ago',
+      'unread': 0,
+      'online': false,
+    },
+    {
+      'name': 'Sarah Wilson',
+      'avatar': 'images/Ellipse 783@3x(1).png',
+      'lastMessage': 'Thanks for the recommendation',
+      'time': '3 hours ago',
+      'unread': 1,
+      'online': true,
+    },
+    {
+      'name': 'David Lee',
+      'avatar': 'images/Ellipse 783@3x(2).png',
+      'lastMessage': 'See you at the cafe',
+      'time': '1 day ago',
+      'unread': 0,
+      'online': false,
+    },
+  ];
+  
+  // 房间聊天列表
   final List<Map<String, dynamic>> chatRooms = [
-    {'name': 'Cafe Nomads', 'hot': true},
-    {'name': 'Cafe Nomads', 'hot': true},
-    {'name': 'Cafe Nomads', 'hot': true},
-    {'name': 'Cafe Nomads', 'hot': true},
-    {'name': 'Cafe Nomads', 'hot': true},
-    {'name': 'Cafe Nomads', 'hot': true},
+    {'name': 'Cafe Nomads', 'members': 156, 'hot': true},
+    {'name': 'Travel Enthusiasts', 'members': 243, 'hot': true},
+    {'name': 'Digital Nomads Asia', 'members': 189, 'hot': false},
+    {'name': 'Remote Workers', 'members': 312, 'hot': true},
+    {'name': 'Photography Lovers', 'members': 98, 'hot': false},
+    {'name': 'Tech Talk', 'members': 421, 'hot': true},
   ];
   
   @override
@@ -20,5 +60,18 @@ class ChatLogic extends GetxController {
   void selectTab(int index) { 
     selectedTab = index;
     update();
+  }
+  
+  void openPrivateChat(int index) {
+    final chat = privateChats[index];
+    NavigationUtil.toPrivateChat(
+      userName: chat['name'],
+      userAvatar: chat['avatar'],
+    );
+  }
+  
+  void joinRoomChat(int index) {
+    final room = chatRooms[index];
+    NavigationUtil.toRoomChat(roomName: room['name']);
   }
 }

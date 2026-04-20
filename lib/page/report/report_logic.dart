@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class ReportLogic extends GetxController {
@@ -16,6 +18,7 @@ class ReportLogic extends GetxController {
   
   int? selectedReason;
   final TextEditingController descriptionController = TextEditingController();
+  bool isSubmitting = false;
   
   void selectReason(int index) {
     selectedReason = index;
@@ -24,28 +27,88 @@ class ReportLogic extends GetxController {
   
   void submitReport() {
     if (selectedReason == null) {
-      Get.snackbar(
-        'Error',
-        'Please select a reason',
-        snackPosition: SnackPosition.BOTTOM,
+      showCupertinoDialog(
+        context: Get.context!,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Error'),
+          content: const Text('Please select a reason for reporting'),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Get.back(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
       return;
     }
     
-    // TODO: Submit report to backend
-    print('Report submitted');
-    print('Reason: ${reportReasons[selectedReason!]}');
-    print('Description: ${descriptionController.text}');
+    // Show loading
+    EasyLoading.show(status: 'Submitting report...');
+    isSubmitting = true;
+    update();
     
-    Get.back();
-    Get.snackbar(
-      'Success',
-      'Report submitted successfully',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // TODO: Submit report to backend
+    // Example:
+    // await ReportService.submitReport(
+    //   reason: reportReasons[selectedReason!],
+    //   description: descriptionController.text,
+    //   reportedUserId: reportedUserId,
+    //   reportedPostId: reportedPostId,
+    // );
+    
+    // Simulate API call
+    Future.delayed(const Duration(seconds: 2), () {
+      EasyLoading.dismiss();
+      isSubmitting = false;
+      update();
+      
+      // Show success dialog
+      showCupertinoDialog(
+        context: Get.context!,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Thank You'),
+          content: const Text(
+            'Your report has been submitted. We will review it and take appropriate action.',
+          ),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                Get.back(); // Close dialog
+                Get.back(); // Go back to previous page
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      
+      print('Report submitted');
+      print('Reason: ${reportReasons[selectedReason!]}');
+      print('Description: ${descriptionController.text}');
+    });
   }
   
   void onBack() {
+    if (isSubmitting) {
+      showCupertinoDialog(
+        context: Get.context!,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Wait'),
+          content: const Text('Please wait while submitting the report'),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Get.back(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     Get.back();
   }
   

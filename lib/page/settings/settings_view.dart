@@ -62,9 +62,27 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.logout, color: Colors.red),
+                    Icon(Icons.logout, color: Colors.orange),
                     SizedBox(width: 16),
-                    Text('Logout', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red)),
+                    Text('Logout', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.orange)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: logic.onDeleteAccount,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.delete_forever, color: Colors.red),
+                    SizedBox(width: 16),
+                    Text('Delete Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red)),
                   ],
                 ),
               ),

@@ -33,11 +33,20 @@ class LogoLogic extends GetxController {
   void setHome() {
     final box = GetStorage();
     final hasCompletedOnboarding = box.read('onboarding_completed') ?? false;
+    final isLoggedIn = box.read('is_logged_in') ?? false;
 
-    if (hasCompletedOnboarding) {
-      NavigationUtil.toLoginIndex();
-    } else {
+    // If not completed onboarding, show onboarding first
+    if (!hasCompletedOnboarding) {
       NavigationUtil.toOnboarding();
+      return;
+    }
+
+    // If completed onboarding and logged in, go to main page
+    if (isLoggedIn) {
+      NavigationUtil.toMainTab();
+    } else {
+      // If completed onboarding but not logged in, go to login
+      NavigationUtil.toLoginIndex();
     }
   }
 

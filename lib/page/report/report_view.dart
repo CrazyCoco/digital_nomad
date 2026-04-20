@@ -68,26 +68,39 @@ class _ReportPageState extends State<ReportPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(20),
-              child: GestureDetector(
-                onTap: logic.submitReport,
-                child: Container(
-                  width: double.infinity,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(27),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Submit Report',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+              child: GetBuilder<ReportLogic>(
+                builder: (l) {
+                  return GestureDetector(
+                    onTap: l.isSubmitting ? null : logic.submitReport,
+                    child: Container(
+                      width: double.infinity,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: l.isSubmitting ? Colors.grey : Colors.black,
+                        borderRadius: BorderRadius.circular(27),
+                      ),
+                      child: Center(
+                        child: l.isSubmitting
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                'Submit Report',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
