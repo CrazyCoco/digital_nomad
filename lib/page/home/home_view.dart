@@ -412,16 +412,19 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
                 const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.error_outline,
-                    size: 24,
-                    color: Colors.black54,
+                GestureDetector(
+                  onTap: () => logic.onReportPost(index),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline,
+                      size: 24,
+                      color: Colors.black54,
+                    ),
                   ),
                 ),
               ],

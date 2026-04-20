@@ -65,67 +65,94 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   Widget _buildPostHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: const Color(0xFFBBDEFB),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.person, size: 30, color: Color(0xFF2196F3)),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return GetBuilder<PostDetailLogic>(
+      builder: (l) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
             children: [
-              Text(
-                logic.userName,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFBBDEFB),
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: AssetImage(l.userAvatar),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              Text(
-                logic.postTime,
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.userName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    l.postTime,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildPostContent() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Text(
-        logic.postContent,
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.black87,
-          height: 1.5,
-        ),
-      ),
+    return GetBuilder<PostDetailLogic>(
+      builder: (l) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            l.postContent,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+              height: 1.5,
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildPostImage() {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      height: 300,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE1F5FE),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Center(
-        child: Icon(Icons.image, size: 80, color: Color(0xFF90CAF9)),
-      ),
+    return GetBuilder<PostDetailLogic>(
+      builder: (l) {
+        return Container(
+          margin: const EdgeInsets.all(20),
+          height: 300,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              l.postImage,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: const Color(0xFFE1F5FE),
+                  child: const Center(
+                    child: Icon(Icons.image, size: 80, color: Color(0xFF90CAF9)),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -226,8 +253,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
             decoration: BoxDecoration(
               color: const Color(0xFFBBDEFB),
               shape: BoxShape.circle,
+              image: comment['avatar'] != null && comment['avatar'].toString().isNotEmpty
+                  ? DecorationImage(
+                      image: AssetImage(comment['avatar']),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: const Icon(Icons.person, size: 24, color: Color(0xFF2196F3)),
+            child: comment['avatar'] == null || comment['avatar'].toString().isEmpty
+                ? const Icon(Icons.person, size: 24, color: Color(0xFF2196F3))
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(

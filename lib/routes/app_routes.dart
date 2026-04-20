@@ -139,8 +139,19 @@ class NavigationUtil {
   }
 
   /// 跳转到举报页面
-  static void toReport() {
-    Get.toNamed(AppRoutes.report);
+  static void toReport({
+    String reportedType = 'post',
+    String reportedUserName = '',
+    String reportedContent = '',
+  }) {
+    Get.toNamed(
+      AppRoutes.report,
+      arguments: {
+        'reportedType': reportedType,
+        'reportedUserName': reportedUserName,
+        'reportedContent': reportedContent,
+      },
+    );
   }
 
   /// 跳转到动态详情

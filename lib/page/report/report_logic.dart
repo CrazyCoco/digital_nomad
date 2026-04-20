@@ -4,6 +4,11 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class ReportLogic extends GetxController {
+  // 被举报信息
+  String reportedType = 'post';
+  String reportedUserName = '';
+  String reportedContent = '';
+  
   // 举报原因选项
   List<String> reportReasons = [
     'Spam or misleading',
@@ -19,6 +24,18 @@ class ReportLogic extends GetxController {
   int? selectedReason;
   final TextEditingController descriptionController = TextEditingController();
   bool isSubmitting = false;
+  
+  @override
+  void onInit() {
+    super.onInit();
+    // Get arguments from route
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      reportedType = args['reportedType'] ?? 'post';
+      reportedUserName = args['reportedUserName'] ?? '';
+      reportedContent = args['reportedContent'] ?? '';
+    }
+  }
   
   void selectReason(int index) {
     selectedReason = index;

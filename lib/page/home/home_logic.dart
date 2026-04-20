@@ -197,4 +197,17 @@ class HomeLogic extends GetxController {
       }
     }
   }
+  
+  /// Report post
+  void onReportPost(int index) {
+    final currentPosts = posts;
+    if (index >= 0 && index < currentPosts.length) {
+      final post = currentPosts[index];
+      NavigationUtil.toReport(
+        reportedType: 'post',
+        reportedUserName: post['user'] ?? 'Unknown',
+        reportedContent: post['description'] ?? '',
+      );
+    }
+  }
 }
