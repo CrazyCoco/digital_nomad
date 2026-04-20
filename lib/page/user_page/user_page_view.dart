@@ -283,12 +283,11 @@ class _UserPagePageState extends State<UserPagePage> {
             mainAxisSpacing: 8,
             childAspectRatio: 1.0,
           ),
-          itemCount: l.posts.length,
+          itemCount: l.displayPosts.length,
           itemBuilder: (context, index) {
+            final post = l.displayPosts[index];
             return GestureDetector(
-              onTap: () {
-                // TODO: Navigate to post detail
-              },
+              onTap: () => l.onPostTap(index),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -299,8 +298,8 @@ class _UserPagePageState extends State<UserPagePage> {
                     Positioned.fill(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: l.posts[index]['image'] != null
-                            ? Image.asset(l.posts[index]['image'], fit: BoxFit.cover)
+                        child: post['image'] != null
+                            ? Image.asset(post['image'], fit: BoxFit.cover)
                             : Container(
                                 color: const Color(0xFFE1F5FE),
                                 child: Center(
@@ -321,13 +320,13 @@ class _UserPagePageState extends State<UserPagePage> {
                           Icon(
                             Icons.favorite,
                             size: 16,
-                            color: l.posts[index]['liked']
+                            color: post['liked']
                                 ? Colors.red
                                 : Colors.white,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${l.posts[index]['likes']}',
+                            '${post['likes']}',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

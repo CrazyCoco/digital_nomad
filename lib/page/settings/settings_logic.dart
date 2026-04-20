@@ -6,25 +6,12 @@ import 'package:get_storage/get_storage.dart';
 import '../../routes/app_routes.dart';
 
 class SettingsLogic extends GetxController {
-  bool notifications = true;
-  bool darkMode = false;
   String language = 'English';
-  
-  void toggleNotifications() {
-    notifications = !notifications;
-    update();
-  }
-  
-  void toggleDarkMode() {
-    darkMode = !darkMode;
-    update();
-  }
   
   void onBack() => Get.back();
   
   void onEditProfile() {
-    // TODO: Navigate to edit profile
-    print('Navigate to edit profile');
+    NavigationUtil.toEditProfile();
   }
   
   void onPrivacyPolicy() {
@@ -33,6 +20,42 @@ class SettingsLogic extends GetxController {
   
   void onTermsOfService() {
     NavigationUtil.toTermsOfService();
+  }
+  
+  void onHelpCenter() {
+    // TODO: Navigate to help center
+    Get.snackbar(
+      'Help Center',
+      'Coming soon',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+  
+  void onAboutUs() {
+    // TODO: Navigate to about us
+    Get.snackbar(
+      'About Us',
+      'Version 1.0.0\nDigital Nomad App',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+  
+  void onRateApp() {
+    // TODO: Open app store
+    Get.snackbar(
+      'Rate App',
+      'Thank you for your support!',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+  
+  void onShareApp() {
+    // TODO: Share app
+    Get.snackbar(
+      'Share App',
+      'Share feature coming soon',
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
   
   void onDeleteAccount() {

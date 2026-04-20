@@ -3,6 +3,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../comm/realm_service.dart';
 import '../../routes/app_routes.dart';
+import '../home/home_logic.dart';
 
 class FollowListLogic extends GetxController {
   final RealmService _realmService = RealmService();
@@ -114,6 +115,15 @@ class FollowListLogic extends GetxController {
     }
     
     update();
+    
+    // Notify HomeLogic to refresh suggested users
+    try {
+      final homeLogic = Get.find<HomeLogic>();
+      homeLogic.refreshSuggestedUsers();
+    } catch (e) {
+      // HomeLogic might not be initialized yet
+      print('HomeLogic not found: $e');
+    }
   }
   
   void onUserTap(String name) {

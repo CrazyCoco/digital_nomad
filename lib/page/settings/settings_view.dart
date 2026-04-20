@@ -38,18 +38,16 @@ class _SettingsPageState extends State<SettingsPage> {
               _buildMenuItem(Icons.person, 'Edit Profile', onTap: logic.onEditProfile),
             ]),
             const SizedBox(height: 20),
-            _buildSection('Preferences', [
-              GetBuilder<SettingsLogic>(
-                builder: (l) => _buildSwitchItem(Icons.notifications, 'Notifications', l.notifications, l.toggleNotifications),
-              ),
-              GetBuilder<SettingsLogic>(
-                builder: (l) => _buildSwitchItem(Icons.dark_mode, 'Dark Mode', l.darkMode, l.toggleDarkMode),
-              ),
-            ]),
-            const SizedBox(height: 20),
             _buildSection('Support', [
+              _buildMenuItem(Icons.help_outline, 'Help Center', onTap: logic.onHelpCenter),
               _buildMenuItem(Icons.privacy_tip, 'Privacy Policy', onTap: logic.onPrivacyPolicy),
               _buildMenuItem(Icons.description, 'Terms of Service', onTap: logic.onTermsOfService),
+            ]),
+            const SizedBox(height: 20),
+            _buildSection('About', [
+              _buildMenuItem(Icons.info_outline, 'About Us', onTap: logic.onAboutUs),
+              _buildMenuItem(Icons.star_outline, 'Rate App', onTap: logic.onRateApp),
+              _buildMenuItem(Icons.share, 'Share App', onTap: logic.onShareApp),
             ]),
             const SizedBox(height: 20),
             GestureDetector(
@@ -125,20 +123,6 @@ class _SettingsPageState extends State<SettingsPage> {
             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSwitchItem(IconData icon, String title, bool value, VoidCallback onChanged) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Icon(icon, size: 24, color: Colors.black87),
-          const SizedBox(width: 16),
-          Expanded(child: Text(title, style: const TextStyle(fontSize: 16))),
-          Switch(value: value, onChanged: (_) => onChanged()),
-        ],
       ),
     );
   }

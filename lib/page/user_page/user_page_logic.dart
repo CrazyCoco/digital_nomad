@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../comm/realm_service.dart';
 import '../../routes/app_routes.dart';
+import '../home/home_logic.dart';
 
 class UserPageLogic extends GetxController {
   final RealmService _realmService = RealmService();
@@ -24,8 +26,11 @@ class UserPageLogic extends GetxController {
   // 关注状态
   bool isFollowing = false;
   
-  // Posts data
+  // Posts data (用户发布的帖子)
   List<Map<String, dynamic>> posts = [];
+  
+  // Liked posts data (用户点赞的帖子)
+  List<Map<String, dynamic>> likedPosts = [];
   
   @override
   void onInit() {
@@ -74,6 +79,23 @@ class UserPageLogic extends GetxController {
       'comments': post.comments,
       'time': _formatTime(post.createdAt),
       'liked': post.isLiked,
+      'userId': post.userId,
+      'userName': post.userName,
+      'userAvatar': post.userAvatar,
+    }).toList();
+    
+    // Load posts that user has liked
+    final allPosts = _realmService.getAllPosts();
+    likedPosts = allPosts.where((post) => post.isLiked).map((post) => {
+      'id': post.id,
+      'image': post.image ?? '',
+      'likes': post.likes,
+      'comments': post.comments,
+      'time': _formatTime(post.createdAt),
+      'liked': post.isLiked,
+      'userId': post.userId,
+      'userName': post.userName,
+      'userAvatar': post.userAvatar,
     }).toList();
     
     update();
@@ -100,6 +122,15 @@ class UserPageLogic extends GetxController {
     update();
   }
   
+  /// Get current display posts based on selected tab
+  List<Map<String, dynamic>> get displayPosts {
+    if (selectedTab == 0) {
+      return posts; // Posts tab
+    } else {
+      return likedPosts; // Likes tab
+    }
+  }
+  
   void toggleFollow() {
     final box = GetStorage();
     final currentUserId = box.read('user_id') as String?;
@@ -120,11 +151,21 @@ class UserPageLogic extends GetxController {
     
     isFollowing = !isFollowing;
     update();
+    
+    // Notify HomeLogic to refresh suggested users
+    try {
+      final homeLogic = Get.find<HomeLogic>();
+      homeLogic.refreshSuggestedUsers();
+    } catch (e) {
+      // HomeLogic might not be initialized yet
+      print('HomeLogic not found: $e');
+    }
   }
   
   void toggleLike(int index) {
-    if (index >= 0 && index < posts.length) {
-      final post = posts[index];
+    final currentPosts = displayPosts;
+    if (index >= 0 && index < currentPosts.length) {
+      final post = currentPosts[index];
       final postId = post['id'] as String?;
       
       if (postId != null) {
@@ -138,6 +179,12 @@ class UserPageLogic extends GetxController {
         } else {
           post['likes']--;
         }
+        
+        // If we're in Likes tab and user unlikes, remove from list
+        if (selectedTab == 1 && !post['liked']) {
+          likedPosts.removeAt(index);
+        }
+        
         update();
       }
     }
@@ -148,8 +195,7 @@ class UserPageLogic extends GetxController {
   }
   
   void onEditProfile() {
-    // TODO: Navigate to edit profile
-    print('Edit profile');
+    NavigationUtil.toEditProfile();
   }
   
   void onMessage() {
@@ -160,7 +206,52 @@ class UserPageLogic extends GetxController {
   }
   
   void onMoreOptions() {
-    // TODO: Show more options menu
-    print('More options');
+    // Show more options menu
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.block, color: Colors.orange),
+              title: const Text('Block User'),
+              onTap: () {
+                Get.back();
+                Get.snackbar(
+                  'Blocked',
+                  '$userName has been blocked',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.flag, color: Colors.red),
+              title: const Text('Report User'),
+              onTap: () {
+                Get.back();
+                NavigationUtil.toReport(
+                  reportedType: 'user',
+                  reportedUserName: userName,
+                  reportedContent: '',
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Navigate to post detail
+  void onPostTap(int index) {
+    final currentPosts = displayPosts;
+    if (index >= 0 && index < currentPosts.length) {
+      NavigationUtil.toPostDetail(postData: currentPosts[index]);
+    }
   }
 }

@@ -21,139 +21,228 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              // Video player
-              Center(
-                child: GetBuilder<VideoPlayerLogic>(
-                  builder: (l) {
-                    if (!l.isInitialized) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    }
-                    return AspectRatio(
-                      aspectRatio: l.controller.value.aspectRatio,
+        body: GetBuilder<VideoPlayerLogic>(
+          builder: (l) {
+            if (!l.isInitialized) {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
+            }
+
+            return Stack(
+              children: [
+                // Video player - full screen
+                Positioned.fill(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: l.controller.value.size.width,
+                      height: l.controller.value.size.height,
                       child: VideoPlayer(l.controller),
-                    );
-                  },
+                    ),
+                  ),
                 ),
-              ),
-              
-              // Play/Pause overlay
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: logic.togglePlayPause,
-                  child: GetBuilder<VideoPlayerLogic>(
-                    builder: (l) {
-                      if (!l.isInitialized) return const SizedBox();
-                      return AnimatedOpacity(
-                        opacity: l.controller.value.isPlaying ? 0.0 : 1.0,
-                        duration: const Duration(milliseconds: 300),
+
+                // Play/Pause overlay
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: l.togglePlayPause,
+                    child: AnimatedOpacity(
+                      opacity: l.controller.value.isPlaying ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Center(
                         child: Container(
-                          color: Colors.black.withOpacity(0.3),
-                          child: Center(
-                            child: Icon(
-                              l.controller.value.isPlaying
-                                  ? Icons.pause_circle_filled
-                                  : Icons.play_circle_filled,
-                              size: 80,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            l.controller.value.isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            size: 40,
+                            color: Colors.white,
                           ),
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              
-              // Top bar with back button
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                        onPressed: () => Get.back(),
+
+                // Top bar
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              // Bottom controls
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: GetBuilder<VideoPlayerLogic>(
-                  builder: (l) {
-                    if (!l.isInitialized) return const SizedBox();
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.7),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Progress bar
-                          VideoProgressIndicator(
-                            l.controller,
-                            allowScrubbing: true,
-                            colors: const VideoProgressColors(
-                              playedColor: Color(0xFF42A5F5),
-                              bufferedColor: Colors.white30,
-                              backgroundColor: Colors.white12,
+                          // Back button
+                          GestureDetector(
+                            onTap: l.onBack,
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF1C1C1E),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 24,
+                              ),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
-                          
-                          // Time and duration
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  l.formatDuration(l.controller.value.position),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  l.formatDuration(l.controller.value.duration),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                          // Weather icon
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.wb_sunny,
+                              color: Color(0xFFFF9800),
+                              size: 24,
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
+
+                // Right side actions
+                Positioned(
+                  right: 16,
+                  bottom: 160,
+                  child: Column(
+                    children: [
+                      // Like button
+                      GestureDetector(
+                        onTap: l.toggleLike,
+                        child: Column(
+                          children: [
+                            Icon(
+                              l.isLiked ? Icons.favorite : Icons.favorite_border,
+                              size: 40,
+                              color: l.isLiked ? Colors.red : Colors.white,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${l.likes}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Report button
+                      GestureDetector(
+                        onTap: l.onReport,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.warning_amber_outlined,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Bottom info
+                Positioned(
+                  left: 16,
+                  right: 80,
+                  bottom: 40,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User info
+                      Row(
+                        children: [
+                          // User avatar
+                          GestureDetector(
+                            onTap: l.onUserTap,
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: const Color(0xFFBBDEFB),
+                              backgroundImage: l.userAvatar.isNotEmpty
+                                  ? AssetImage(l.userAvatar)
+                                  : null,
+                              child: l.userAvatar.isEmpty
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 24,
+                                      color: Color(0xFF2196F3),
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.userName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (l.time.isNotEmpty)
+                                Text(
+                                  l.time,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Description
+                      if (l.description.isNotEmpty)
+                        Text(
+                          l.description,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

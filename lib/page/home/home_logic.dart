@@ -202,4 +202,9 @@ class HomeLogic extends GetxController {
       update();
     }
   }
+  
+  /// Refresh suggested users (called from other pages)
+  void refreshSuggestedUsers() {
+    loadSuggestedUsers();
+  }
 }

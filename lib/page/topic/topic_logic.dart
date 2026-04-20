@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../routes/app_routes.dart';
+
 class TopicLogic extends GetxController {
   // 话题列表
   List<Map<String, dynamic>> topics = [
@@ -42,8 +44,10 @@ class TopicLogic extends GetxController {
   ];
   
   void onTopicTap(int index) {
-    // TODO: Navigate to topic detail
-    print('Navigate to topic: ${topics[index]['title']}');
+    if (index >= 0 && index < topics.length) {
+      final topic = topics[index];
+      NavigationUtil.toTopicDetail(topicTitle: topic['title']);
+    }
   }
   
   void onBack() {
