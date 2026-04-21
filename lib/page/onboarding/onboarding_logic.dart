@@ -54,7 +54,7 @@ class OnboardingLogic extends GetxController {
   void onSkip() {
     // Mark onboarding as completed
     GetStorage().write('onboarding_completed', true);
-    NavigationUtil.toMainTab();
+    NavigationUtil.toLoginIndex();
   }
 
   /// Go to next page or complete
