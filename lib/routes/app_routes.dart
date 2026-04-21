@@ -114,8 +114,8 @@ class NavigationUtil {
   }
 
   /// 跳转到用户主页
-  static void toUserPage({String? userName}) {
-    Get.toNamed(AppRoutes.userPage, arguments: {'userName': userName});
+  static Future<T?>? toUserPage<T>({String? userName}) {
+    return Get.toNamed(AppRoutes.userPage, arguments: {'userName': userName});
   }
 
   /// 跳转到编辑资料

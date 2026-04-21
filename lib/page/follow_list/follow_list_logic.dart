@@ -57,8 +57,15 @@ class FollowListLogic extends GetxController {
     }).toList();
     
     // Load friends (mutual follows)
+    // Friends are users who both follow and are followed by current user
     friendsList = followingList.where((following) {
       return followersList.any((follower) => follower['id'] == following['id']);
+    }).map((friend) => {
+      'id': friend['id'],
+      'name': friend['name'],
+      'bio': friend['bio'],
+      'isFollowing': true,
+      'avatar': friend['avatar'],
     }).toList();
     
     update();

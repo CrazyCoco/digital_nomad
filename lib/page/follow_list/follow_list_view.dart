@@ -14,8 +14,29 @@ class FollowListPage extends StatefulWidget {
   State<FollowListPage> createState() => _FollowListPageState();
 }
 
-class _FollowListPageState extends State<FollowListPage> {
+class _FollowListPageState extends State<FollowListPage> with WidgetsBindingObserver {
   final FollowListLogic logic = Get.put(FollowListLogic());
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    Get.delete<FollowListLogic>();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh data when app resumes
+      logic.loadData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,12 +160,10 @@ class _FollowListPageState extends State<FollowListPage> {
               Stack(
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      NavigationUtil.toUserPage(userName: user['name']);
-                      // Refresh data when returning
-                      Future.delayed(Duration.zero, () {
-                        l.loadData();
-                      });
+                    onTap: () async {
+                      await NavigationUtil.toUserPage(userName: user['name']);
+                      // Refresh data when returning from user page
+                      l.loadData();
                     },
                     child: Container(
                       width: 60,
@@ -235,11 +254,5 @@ class _FollowListPageState extends State<FollowListPage> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    Get.delete<FollowListLogic>();
-    super.dispose();
   }
 }

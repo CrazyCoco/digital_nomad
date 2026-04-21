@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../routes/app_routes.dart';
 import '../../widgets/empty_state_view.dart';
 
 class StorePage extends StatefulWidget {
@@ -57,19 +56,6 @@ class _StorePageState extends State<StorePage> {
               ],
             ),
           ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'Friend request',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -78,150 +64,148 @@ class _StorePageState extends State<StorePage> {
   Widget _buildFriendList() {
     return GetBuilder<StoreLogic>(
       builder: (l) {
-        if (l.friendRequests.isEmpty) {
-          return EmptyStateView(message: 'No friend requests');
+        if (l.friendsList.isEmpty) {
+          return EmptyStateView(message: 'No friends yet');
         }
         
         return RefreshIndicator(
           onRefresh: () async {
-            // TODO: 实现实际的下拉刷新逻辑
             await Future.delayed(const Duration(seconds: 1));
-            l.update();
+            l.loadFriends();
           },
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: l.friendRequests.length,
+            itemCount: l.friendsList.length,
             itemBuilder: (context, index) {
-              final request = l.friendRequests[index];
-              final isLast = index == l.friendRequests.length - 1;
+              final friend = l.friendsList[index];
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+              return Dismissible(
+                key: Key(friend['id']),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      children: [
-                        GestureDetector(
-                          onTap: () => NavigationUtil.toUserPage(userName: request['name']),
-                          child: CircleAvatar(
-                            radius: 32,
-                            backgroundImage: const NetworkImage(
-                              'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop',
-                            ),
-                            backgroundColor: const Color(0xFFE1F5FE),
-                            child: const Icon(
-                              Icons.person,
-                              size: 40,
-                              color: Color(0xFF2196F3),
-                            ),
+                confirmDismiss: (direction) async {
+                  return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Remove Friend'),
+                        content: Text('Are you sure you want to remove ${friend['name']} from your friends?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancel'),
                           ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${request['unread']}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                request['name'],
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: request['gender'] == 'Female'
-                                      ? const Color(0xFFFF80AB)
-                                      : const Color(0xFF82B1FF),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  request['gender'],
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                request['time'],
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black38,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            request['message'],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54,
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text(
+                              'Remove',
+                              style: TextStyle(color: Colors.red),
                             ),
                           ),
                         ],
+                      );
+                    },
+                  );
+                },
+                onDismissed: (direction) {
+                  l.removeFriend(index);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Stack(
+                        children: [
+                          GestureDetector(
+                            onTap: () => l.onUserTap(friend['name']),
+                            child: CircleAvatar(
+                              radius: 32,
+                              backgroundImage: AssetImage(friend['avatar']),
+                              backgroundColor: const Color(0xFFE1F5FE),
+                              child: friend['avatar'] == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 40,
+                                      color: Color(0xFF2196F3),
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          if (friend['isOnline'])
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF76FF03),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                    if (isLast) ...[
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => l.deleteFriendRequest(index),
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFEBEE),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.delete_outline,
-                            size: 24,
-                            color: Color(0xFFFF5252),
-                          ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              friend['name'],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              friend['bio'],
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${friend['postsCount']} posts',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black38,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Color(0xFF42A5F5),
+                        size: 24,
+                      ),
                     ],
-                  ],
+                  ),
                 ),
               );
             },

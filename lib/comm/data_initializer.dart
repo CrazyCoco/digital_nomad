@@ -21,7 +21,11 @@ class DataInitializer {
     final existingRooms = _realmService.getAllChatRooms();
     final hasRooms = existingRooms.isNotEmpty;
     
-    if (hasUsers && hasRooms) {
+    // 检查是否已有好友关系（通过关注关系判断）
+    final existingFollowing = _realmService.getFollowingUsers('user_1');
+    final hasFriends = existingFollowing.length >= 3;
+    
+    if (hasUsers && hasRooms && hasFriends) {
       print('All seed data already exists, skipping initialization');
       return;
     }
@@ -66,6 +70,13 @@ class DataInitializer {
       
       print('Chat Rooms: ${chatRooms.length}');
       print('Seed Messages: ${seedMessages.length}');
+    }
+    
+    // 如果没有好友关系数据，创建种子好友关系
+    if (!hasFriends && hasUsers) {
+      print('Creating friend relationships...');
+      _createSeedFriendRelationships();
+      print('Friend relationships created');
     }
     
     print('Seed data initialized successfully');
@@ -800,5 +811,25 @@ class DataInitializer {
     ]);
     
     return messages;
+  }
+  
+  /// 创建种子好友关系（互相关注）
+  static void _createSeedFriendRelationships() {
+    // user_1 (Alice) 与 user_2, user_3, user_4, user_5 互相关注
+    final friendPairs = [
+      ('user_1', 'user_2'),
+      ('user_1', 'user_3'),
+      ('user_1', 'user_4'),
+      ('user_1', 'user_5'),
+      ('user_2', 'user_3'),
+      ('user_2', 'user_4'),
+      ('user_3', 'user_5'),
+    ];
+    
+    for (final pair in friendPairs) {
+      // 双向关注
+      _realmService.followUser(pair.$1, pair.$2);
+      _realmService.followUser(pair.$2, pair.$1);
+    }
   }
 }

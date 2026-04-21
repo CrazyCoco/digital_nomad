@@ -9,6 +9,7 @@ import '../model/follow.dart';
 import '../model/blocklist.dart';
 import '../model/report.dart';
 import '../model/chat_room.dart';
+import '../model/friend_request.dart';
 
 class RealmService {
   static final RealmService _instance = RealmService._internal();
@@ -35,6 +36,7 @@ class RealmService {
       Blocklist.schema,
       Report.schema,
       ChatRoom.schema,
+      FriendRequest.schema,
     ]);
 
     _realm = Realm(config);
@@ -604,5 +606,100 @@ class RealmService {
         room.updatedAt = DateTime.now();
       });
     }
+  }
+
+  // ==================== Friend Request Operations ====================
+
+  /// 发送好友请求
+  FriendRequest sendFriendRequest(String requesterId, String receiverId, String receiverName, {String? message}) {
+    final id = '${requesterId}_${receiverId}';
+    final existingRequest = _realm.find<FriendRequest>(id);
+    
+    if (existingRequest != null) {
+      // 如果已有请求，更新时间
+      _realm.write(() {
+        existingRequest.createdAt = DateTime.now();
+        existingRequest.isRead = false;
+        existingRequest.message = message;
+      });
+      return existingRequest;
+    }
+    
+    // 创建新的好友请求
+    final user = _realm.find<User>(requesterId);
+    final requesterName = user?.name ?? 'Unknown';
+    final requesterAvatar = user?.avatar;
+    
+    final request = FriendRequest(
+      id,
+      requesterId,
+      requesterName,
+      receiverId,
+      DateTime.now(),
+      requesterAvatar: requesterAvatar,
+      message: message ?? 'Hi, let\'s be friends!',
+      isRead: false,
+    );
+    
+    return _realm.write(() {
+      return _realm.add(request);
+    });
+  }
+
+  /// 获取指定用户收到的好友请求
+  List<FriendRequest> getReceivedFriendRequests(String userId) {
+    return _realm.all<FriendRequest>()
+        .where((req) => req.receiverId == userId && !req.isRead)
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 按时间倒序排列
+  }
+
+  /// 获取指定用户发送的好友请求
+  List<FriendRequest> getSentFriendRequests(String userId) {
+    return _realm.all<FriendRequest>()
+        .where((req) => req.requesterId == userId)
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 按时间倒序排列
+  }
+
+  /// 接受好友请求
+  void acceptFriendRequest(String requestId) {
+    final request = _realm.find<FriendRequest>(requestId);
+    if (request != null) {
+      _realm.write(() {
+        // 互相关注对方
+        followUser(request.receiverId, request.requesterId);
+        followUser(request.requesterId, request.receiverId);
+        
+        // 删除请求
+        _realm.delete(request);
+      });
+    }
+  }
+
+  /// 拒绝好友请求
+  void declineFriendRequest(String requestId) {
+    final request = _realm.find<FriendRequest>(requestId);
+    if (request != null) {
+      _realm.write(() {
+        _realm.delete(request);
+      });
+    }
+  }
+
+  /// 标记好友请求为已读
+  void markFriendRequestAsRead(String requestId) {
+    final request = _realm.find<FriendRequest>(requestId);
+    if (request != null) {
+      _realm.write(() {
+        request.isRead = true;
+      });
+    }
+  }
+
+  /// 检查是否存在好友请求
+  bool hasFriendRequest(String requesterId, String receiverId) {
+    final id = '${requesterId}_${receiverId}';
+    return _realm.find<FriendRequest>(id) != null;
   }
 }
