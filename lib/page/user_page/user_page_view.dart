@@ -1,3 +1,4 @@
+import 'package:digital_nomad/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -11,8 +12,29 @@ class UserPagePage extends StatefulWidget {
   State<UserPagePage> createState() => _UserPagePageState();
 }
 
-class _UserPagePageState extends State<UserPagePage> {
+class _UserPagePageState extends State<UserPagePage> with WidgetsBindingObserver {
   final UserPageLogic logic = Get.put(UserPageLogic());
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    Get.delete<UserPageLogic>();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh follow status when app resumes
+      logic.refreshFollowStatus();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,6 +295,12 @@ class _UserPagePageState extends State<UserPagePage> {
   Widget _buildPosts() {
     return GetBuilder<UserPageLogic>(
       builder: (l) {
+        if (l.displayPosts.isEmpty) {
+          return EmptyStateView(
+            message: l.selectedTab == 0 ? 'No posts yet' : 'No liked posts yet',
+            icon: l.selectedTab == 0 ? Icons.grid_on : Icons.favorite_border,
+          );
+        }
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -351,11 +379,5 @@ class _UserPagePageState extends State<UserPagePage> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    Get.delete<UserPageLogic>();
-    super.dispose();
   }
 }

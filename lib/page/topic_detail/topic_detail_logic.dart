@@ -141,10 +141,18 @@ class TopicDetailLogic extends GetxController {
   
   void onUserTap(String userName) {
     NavigationUtil.toUserPage(userName: userName);
+    // Refresh topic data when returning
+    Future.delayed(Duration.zero, () {
+      loadTopicData();
+    });
   }
   
   void onContributorTap(String userId, String userName) {
     NavigationUtil.toUserPage(userName: userName);
+    // Refresh topic data when returning
+    Future.delayed(Duration.zero, () {
+      loadTopicData();
+    });
   }
   
   void onPostTap(int index) {

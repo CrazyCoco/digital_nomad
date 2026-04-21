@@ -175,6 +175,10 @@ class ProfileLogic extends GetxController {
       final userName = post['user'] as String?;
       if (userName != null) {
         NavigationUtil.toUserPage(userName: userName);
+        // Refresh posts when returning
+        Future.delayed(Duration.zero, () {
+          loadCurrentUser();
+        });
       }
     }
   }

@@ -1,10 +1,9 @@
 import 'package:digital_nomad/page/post/post_view.dart';
 import 'package:digital_nomad/page/explore/explore_logic.dart';
+import 'package:digital_nomad/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
-import '../../routes/app_routes.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -286,30 +285,10 @@ class _ExplorePageState extends State<ExplorePage> {
     return GetBuilder<ExploreLogic>(
       builder: (l) {
         if (l.displayPosts.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.explore_outlined,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l.contentTab == 1
-                        ? 'No posts from followed users yet'
-                        : 'No posts available',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
+          return EmptyStateView(
+            message: l.contentTab == 1
+                ? 'No posts from followed users yet'
+                : 'No posts available',
           );
         }
         

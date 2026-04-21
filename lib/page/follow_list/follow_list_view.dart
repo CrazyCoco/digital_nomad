@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../routes/app_routes.dart';
+import '../../widgets/empty_state_view.dart';
 
 import 'follow_list_logic.dart';
 
@@ -111,19 +112,7 @@ class _FollowListPageState extends State<FollowListPage> {
 
   Widget _buildUserList(List<Map<String, dynamic>> users, {required bool showFollowButton}) {
     if (users.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              'No users yet',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
+      return EmptyStateView(message: 'No users yet');
     }
 
     return ListView.builder(
@@ -150,7 +139,13 @@ class _FollowListPageState extends State<FollowListPage> {
               Stack(
                 children: [
                   GestureDetector(
-                    onTap: () => NavigationUtil.toUserPage(userName: user['name']),
+                    onTap: () {
+                      NavigationUtil.toUserPage(userName: user['name']);
+                      // Refresh data when returning
+                      Future.delayed(Duration.zero, () {
+                        l.loadData();
+                      });
+                    },
                     child: Container(
                       width: 60,
                       height: 60,

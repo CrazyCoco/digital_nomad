@@ -1,4 +1,5 @@
 import 'package:digital_nomad/page/post/post_view.dart';
+import 'package:digital_nomad/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -197,9 +198,15 @@ class _HomePageState extends State<HomePage> {
                         Stack(
                           children: [
                             GestureDetector(
-                              onTap: () => NavigationUtil.toUserPage(
-                                userName: user['name'],
-                              ),
+                              onTap: () {
+                                NavigationUtil.toUserPage(
+                                  userName: user['name'],
+                                );
+                                // Refresh suggested users when returning
+                                Future.delayed(Duration.zero, () {
+                                  l.loadSuggestedUsers();
+                                });
+                              },
                               child: CircleAvatar(
                                 radius: 35,
                                 backgroundImage: user['avatar'] != null
@@ -348,6 +355,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildPosts() {
     return GetBuilder<HomeLogic>(
       builder: (l) {
+        if (l.posts.isEmpty) {
+          return EmptyStateView(message: 'No posts available');
+        }
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -356,7 +366,7 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () => logic.onPostTap(index),
-              child: _buildPostCard(l.posts[index], index),
+              child: _buildPostCard(l.posts[index], index, l),
             );
           },
         );
@@ -364,7 +374,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPostCard(Map<String, dynamic> post, int index) {
+  Widget _buildPostCard(Map<String, dynamic> post, int index, HomeLogic? homeLogic) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       height: 200,
@@ -483,8 +493,13 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () =>
-                      NavigationUtil.toUserPage(userName: post['user']),
+                  onTap: () {
+                    NavigationUtil.toUserPage(userName: post['user']);
+                    // Refresh posts when returning
+                    Future.delayed(Duration.zero, () {
+                      homeLogic?.loadPosts();
+                    });
+                  },
                   child: CircleAvatar(
                     radius: 16,
                     backgroundImage: post['avatar'] != null

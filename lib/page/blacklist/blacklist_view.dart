@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../model/user.dart';
+import '../../routes/app_routes.dart';
+import '../../widgets/empty_state_view.dart';
+
 import 'blacklist_logic.dart';
 
 class BlacklistPage extends StatefulWidget {
@@ -42,27 +46,15 @@ class _BlacklistPageState extends State<BlacklistPage> {
         ),
         body: GetBuilder<BlacklistLogic>(
           builder: (l) {
-            if (l.blacklist.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.block_outlined, size: 80, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No blocked users',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              );
+            if (l.blacklistUsers.isEmpty) {
+              return EmptyStateView(message: 'No blocked users');
             }
 
             return ListView.builder(
               padding: const EdgeInsets.all(20),
-              itemCount: l.blacklist.length,
+              itemCount: l.blacklistUsers.length,
               itemBuilder: (context, index) {
-                return _buildBlacklistCard(l.blacklist[index], index);
+                return _buildBlacklistCard(l.blacklistUsers[index], index);
               },
             );
           },
@@ -71,7 +63,7 @@ class _BlacklistPageState extends State<BlacklistPage> {
     );
   }
 
-  Widget _buildBlacklistCard(Map<String, dynamic> user, int index) {
+  Widget _buildBlacklistCard(User user, int index) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -81,17 +73,28 @@ class _BlacklistPageState extends State<BlacklistPage> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFBBDEFB),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.person,
-              size: 35,
-              color: Color(0xFF2196F3),
+          GestureDetector(
+            onTap: () => NavigationUtil.toUserPage(userName: user.name),
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: const Color(0xFFBBDEFB),
+                shape: BoxShape.circle,
+                image: user.avatar != null && user.avatar!.isNotEmpty
+                    ? DecorationImage(
+                        image: AssetImage(user.avatar!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: (user.avatar == null || user.avatar!.isEmpty)
+                  ? const Icon(
+                      Icons.person,
+                      size: 35,
+                      color: Color(0xFF2196F3),
+                    )
+                  : null,
             ),
           ),
           const SizedBox(width: 16),
@@ -100,7 +103,7 @@ class _BlacklistPageState extends State<BlacklistPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user['name'],
+                  user.name,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -108,21 +111,14 @@ class _BlacklistPageState extends State<BlacklistPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  user['bio'],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
+                if (user.bio != null && user.bio!.isNotEmpty)
+                  Text(
+                    user.bio!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Blocked on ${user['blockedAt']}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black45,
-                  ),
-                ),
               ],
             ),
           ),

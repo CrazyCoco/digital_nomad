@@ -1,61 +1,60 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../../comm/realm_service.dart';
+import '../../model/conversation.dart';
+import '../../model/chat_room.dart';
 import '../../routes/app_routes.dart';
 
 class ChatLogic extends GetxController {
+  final RealmService _realmService = RealmService();
+  
   int selectedTab = 0; // 0: Private Chats, 1: Room Chats
   final List<String> tabs = ['Chats', 'Rooms'];
   
-  // 私聊列表
-  final List<Map<String, dynamic>> privateChats = [
-    {
-      'name': 'Alice Johnson',
-      'avatar': 'images/head_1.jpg',
-      'lastMessage': 'Hey! How are you doing?',
-      'time': '2 mins ago',
-      'unread': 2,
-      'online': true,
-    },
-    {
-      'name': 'Michael Chen',
-      'avatar': 'images/head_2.jpg',
-      'lastMessage': 'Let\'s meet up tomorrow!',
-      'time': '1 hour ago',
-      'unread': 0,
-      'online': false,
-    },
-    {
-      'name': 'Sarah Wilson',
-      'avatar': 'images/head_3.jpg',
-      'lastMessage': 'Thanks for the recommendation',
-      'time': '3 hours ago',
-      'unread': 1,
-      'online': true,
-    },
-    {
-      'name': 'David Lee',
-      'avatar': 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
-      'lastMessage': 'See you at the cafe',
-      'time': '1 day ago',
-      'unread': 0,
-      'online': false,
-    },
-  ];
+  // 私聊列表（从数据库加载）
+  List<Conversation> privateChats = [];
   
-  // 房间聊天列表
-  final List<Map<String, dynamic>> chatRooms = [
-    {'name': 'Cafe Nomads', 'members': 156, 'hot': true},
-    {'name': 'Travel Enthusiasts', 'members': 243, 'hot': true},
-    {'name': 'Digital Nomads Asia', 'members': 189, 'hot': false},
-    {'name': 'Remote Workers', 'members': 312, 'hot': true},
-    {'name': 'Photography Lovers', 'members': 98, 'hot': false},
-    {'name': 'Tech Talk', 'members': 421, 'hot': true},
-  ];
+  // 房间聊天列表（从数据库加载）
+  List<ChatRoom> chatRooms = [];
   
   @override
-  void onReady() { super.onReady(); }
+  void onInit() {
+    super.onInit();
+    loadPrivateChats();
+    loadChatRooms();
+  }
+  
+  /// 从数据库加载私聊列表
+  void loadPrivateChats() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId != null) {
+      privateChats = _realmService.getPrivateConversations(currentUserId);
+      update();
+    }
+  }
+  
+  /// 从数据库加载聊天室列表
+  void loadChatRooms() {
+    chatRooms = _realmService.getAllChatRooms();
+    print('Loaded ${chatRooms.length} chat rooms');
+    for (var room in chatRooms) {
+      print('Room: ${room.name}, Members: ${room.membersCount}, Hot: ${room.isHot}');
+    }
+    update();
+  }
+  
   @override
-  void onClose() { super.onClose(); }
+  void onReady() { 
+    super.onReady(); 
+  }
+  
+  @override
+  void onClose() { 
+    super.onClose(); 
+  }
   
   void selectTab(int index) { 
     selectedTab = index;
@@ -63,15 +62,19 @@ class ChatLogic extends GetxController {
   }
   
   void openPrivateChat(int index) {
+    if (index < 0 || index >= privateChats.length) return;
+    
     final chat = privateChats[index];
     NavigationUtil.toPrivateChat(
-      userName: chat['name'],
-      userAvatar: chat['avatar'],
+      userName: chat.userName,
+      userAvatar: chat.userAvatar ?? '',
     );
   }
   
   void joinRoomChat(int index) {
+    if (index < 0 || index >= chatRooms.length) return;
+    
     final room = chatRooms[index];
-    NavigationUtil.toRoomChat(roomName: room['name']);
+    NavigationUtil.toRoomChat(roomName: room.name);
   }
 }

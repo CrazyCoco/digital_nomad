@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../routes/app_routes.dart';
+import '../../widgets/empty_state_view.dart';
 
 import 'friend_request_logic.dart';
 
@@ -45,19 +46,7 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
         body: GetBuilder<FriendRequestLogic>(
           builder: (l) {
             if (l.requests.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.people_alt_outlined, size: 80, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No friend requests',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              );
+              return EmptyStateView(message: 'No friend requests');
             }
 
             return ListView.builder(

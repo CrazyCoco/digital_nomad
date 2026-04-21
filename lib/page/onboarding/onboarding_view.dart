@@ -38,15 +38,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 );
               },
             ),
-            // Back button
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10,
-              left: 15,
-              child: IconButton(
-                icon: Image.asset('images/back.png', width: 40, height: 40),
-                onPressed: logic.onSkip,
-              ),
-            ),
             // Page indicators
             Positioned(
               bottom: 50,

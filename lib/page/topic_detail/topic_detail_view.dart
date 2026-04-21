@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../widgets/empty_state_view.dart';
 import 'topic_detail_logic.dart';
 
 class TopicDetailPage extends StatefulWidget {
@@ -64,33 +65,9 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
         body: GetBuilder<TopicDetailLogic>(
           builder: (l) {
             if (l.posts.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.explore_outlined,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No posts for this topic yet',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Be the first to share!',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[500],
-                      ),
-                    ),
-                  ],
-                ),
+              return EmptyStateView(
+                message: 'No posts for this topic yet',
+                icon: Icons.explore_outlined,
               );
             }
             

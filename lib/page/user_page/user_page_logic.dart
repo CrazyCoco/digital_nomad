@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -42,6 +43,13 @@ class UserPageLogic extends GetxController {
     }
   }
   
+  @override
+  void onReady() {
+    super.onReady();
+    // Refresh follow status when page becomes visible
+    refreshFollowStatus();
+  }
+  
   /// 加载用户数据
   void loadUserData(String name) {
     userName = name;
@@ -62,13 +70,7 @@ class UserPageLogic extends GetxController {
     postsCount = user.postsCount;
     
     // Check if current user is following this user
-    final box = GetStorage();
-    final currentUserId = box.read('user_id') as String?;
-    if (currentUserId != null && currentUserId != userId) {
-      isFollowing = _realmService.isFollowing(currentUserId, userId);
-    } else {
-      isFollowing = false;
-    }
+    refreshFollowStatus();
     
     // Load user's posts from Realm
     final userPosts = _realmService.getPostsByUserId(user.id);
@@ -99,6 +101,19 @@ class UserPageLogic extends GetxController {
     }).toList();
     
     update();
+  }
+  
+  /// Refresh follow status from Realm
+  void refreshFollowStatus() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    if (currentUserId != null && userId.isNotEmpty) {
+      final newFollowStatus = _realmService.isFollowing(currentUserId, userId);
+      if (newFollowStatus != isFollowing) {
+        isFollowing = newFollowStatus;
+        update();
+      }
+    }
   }
   
   /// Format DateTime to readable string
@@ -206,6 +221,14 @@ class UserPageLogic extends GetxController {
   }
   
   void onMoreOptions() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    // Check if already blocked
+    final isBlocked = currentUserId != null && userId.isNotEmpty 
+        ? _realmService.isBlocked(currentUserId, userId) 
+        : false;
+    
     // Show more options menu
     Get.bottomSheet(
       Container(
@@ -218,15 +241,14 @@ class UserPageLogic extends GetxController {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.block, color: Colors.orange),
-              title: const Text('Block User'),
+              leading: Icon(
+                isBlocked ? Icons.block : Icons.block_outlined,
+                color: isBlocked ? Colors.grey : Colors.orange,
+              ),
+              title: Text(isBlocked ? 'Unblock User' : 'Block User'),
               onTap: () {
                 Get.back();
-                Get.snackbar(
-                  'Blocked',
-                  '$userName has been blocked',
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                toggleBlock();
               },
             ),
             ListTile(
@@ -245,6 +267,56 @@ class UserPageLogic extends GetxController {
         ),
       ),
     );
+  }
+  
+  /// Toggle block/unblock user
+  void toggleBlock() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId == null || userId.isEmpty) {
+      return;
+    }
+    
+    if (_realmService.isBlocked(currentUserId, userId)) {
+      // Unblock
+      _realmService.unblockUser(currentUserId, userId);
+      Get.snackbar(
+        'Unblocked',
+        '$userName has been unblocked',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } else {
+      // Block - Show iOS style confirmation dialog
+      showCupertinoDialog(
+        context: Get.context!,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Block User'),
+          content: Text(
+            'Are you sure you want to block $userName? They won\'t be able to see your posts or contact you.',
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Get.back(),
+              child: const Text('Cancel'),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Get.back();
+                _realmService.blockUser(currentUserId, userId);
+                Get.snackbar(
+                  'Blocked',
+                  '$userName has been blocked',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              },
+              child: const Text('Block'),
+            ),
+          ],
+        ),
+      );
+    }
   }
   
   /// Navigate to post detail

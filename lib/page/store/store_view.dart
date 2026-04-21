@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../routes/app_routes.dart';
+import '../../widgets/empty_state_view.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
@@ -77,6 +78,10 @@ class _StorePageState extends State<StorePage> {
   Widget _buildFriendList() {
     return GetBuilder<StoreLogic>(
       builder: (l) {
+        if (l.friendRequests.isEmpty) {
+          return EmptyStateView(message: 'No friend requests');
+        }
+        
         return RefreshIndicator(
           onRefresh: () async {
             // TODO: 实现实际的下拉刷新逻辑

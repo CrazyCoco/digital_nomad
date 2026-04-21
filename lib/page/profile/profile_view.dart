@@ -1,9 +1,8 @@
 import 'package:digital_nomad/page/profile/profile_logic.dart';
+import 'package:digital_nomad/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
-import '../../routes/app_routes.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -344,6 +343,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildVideoList() {
     return GetBuilder<ProfileLogic>(
       builder: (l) {
+        if (l.videos.isEmpty) {
+          return EmptyStateView(message: 'No videos available');
+        }
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),

@@ -1,7 +1,10 @@
 import 'package:digital_nomad/page/chat/chat_logic.dart';
+import 'package:digital_nomad/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+import '../../model/chat_room.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -10,8 +13,36 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final ChatLogic logic = Get.put(ChatLogic());
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    Get.delete<ChatLogic>();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh chat list when app resumes
+      logic.loadPrivateChats();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh when page becomes visible again
+    logic.loadPrivateChats();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,12 +136,16 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildPrivateChatsList() {
     return GetBuilder<ChatLogic>(
-      builder: (l) => ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: l.privateChats.length,
-        itemBuilder: (context, index) {
-          final chat = l.privateChats[index];
-          return GestureDetector(
+      builder: (l) {
+        if (l.privateChats.isEmpty) {
+          return EmptyStateView(message: 'No private chats yet');
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: l.privateChats.length,
+          itemBuilder: (context, index) {
+            final chat = l.privateChats[index];
+            return GestureDetector(
             onTap: () => l.openPrivateChat(index),
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -129,14 +164,22 @@ class _ChatPageState extends State<ChatPage> {
                         decoration: BoxDecoration(
                           color: const Color(0xFFBBDEFB),
                           shape: BoxShape.circle,
+                          image: chat.userAvatar != null && chat.userAvatar!.isNotEmpty
+                              ? DecorationImage(
+                                  image: AssetImage(chat.userAvatar!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
                         ),
-                        child: const Icon(
-                          Icons.person,
-                          size: 32,
-                          color: Color(0xFF2196F3),
-                        ),
+                        child: (chat.userAvatar == null || chat.userAvatar!.isEmpty)
+                            ? const Icon(
+                                Icons.person,
+                                size: 32,
+                                color: Color(0xFF2196F3),
+                              )
+                            : null,
                       ),
-                      if (chat['online'])
+                      if (chat.isOnline)
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -161,14 +204,14 @@ class _ChatPageState extends State<ChatPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              chat['name'],
+                              chat.userName,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              chat['time'],
+                              _formatTime(chat.lastMessageTime),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.black54,
@@ -182,7 +225,7 @@ class _ChatPageState extends State<ChatPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                chat['lastMessage'],
+                                chat.lastMessage ?? 'No messages yet',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.black54,
@@ -191,7 +234,7 @@ class _ChatPageState extends State<ChatPage> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (chat['unread'] > 0)
+                            if (chat.unreadCount > 0)
                               Container(
                                 margin: const EdgeInsets.only(left: 8),
                                 padding: const EdgeInsets.symmetric(
@@ -203,7 +246,7 @@ class _ChatPageState extends State<ChatPage> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
-                                  '${chat['unread']}',
+                                  '${chat.unreadCount}',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.white,
@@ -220,90 +263,151 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           );
-        },
-      ),
+          },
+        );
+      },
     );
+  }
+  
+  /// Format DateTime to readable string
+  String _formatTime(DateTime? dateTime) {
+    if (dateTime == null) return '';
+    
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${dateTime.month}/${dateTime.day}';
+    }
   }
 
   Widget _buildRoomsGrid() {
     return GetBuilder<ChatLogic>(
-      builder: (l) => GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.85,
-        ),
-        itemCount: l.chatRooms.length,
-        itemBuilder: (context, index) {
-          return _buildChatRoom(l.chatRooms[index], index);
-        },
-      ),
+      builder: (l) {
+        if (l.chatRooms.isEmpty) {
+          return EmptyStateView(message: 'No chat rooms available');
+        }
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: l.chatRooms.length,
+          itemBuilder: (context, index) {
+            return _buildChatRoom(l.chatRooms[index], index);
+          },
+        );
+      },
     );
   }
 
-  Widget _buildChatRoom(Map<String, dynamic> room, int index) {
+  Widget _buildChatRoom(ChatRoom room, int index) {
+    // Random image from local images
+    final randomImages = [
+      'images/8952cc30813886ec84178206d8877d23.jpg',
+      'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
+      'images/afc548276bf301d627730fb09e06be7f.jpg',
+      'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
+      'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
+      'images/47bc300ec1f66b7e5ca75c05b341621e.jpg',
+      'images/799ddffd8fbda40cd47b3d6887ed2d6c.jpg',
+      'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
+      'images/bf96945afb419442511807418b87dc16.jpg',
+    ];
+    final backgroundImage = randomImages[index % randomImages.length];
+    
     return GestureDetector(
       onTap: () => logic.joinRoomChat(index),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFE1F5FE),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Stack(
           children: [
+            // Background image
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  color: const Color(0xFFB3E5FC),
-                  child: const Center(
-                    child: Icon(
-                      Icons.headphones,
-                      size: 60,
-                      color: Colors.white54,
-                    ),
+                child: Image.asset(
+                  backgroundImage,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+            ),
+            // Dark overlay for better text readability
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.7),
+                    ],
+                    stops: const [0.4, 1.0],
                   ),
                 ),
               ),
             ),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.orange,
-                      shape: BoxShape.circle,
+            // Hot label
+            if (room.isHot)
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF8C42),
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    'Chatting hot',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Hot',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFFFF8C42),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            // Bottom content
             Positioned(
-              bottom: 12,
+              bottom: 16,
               left: 12,
               right: 12,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Room name
                   Text(
-                    room['name'],
+                    room.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       shadows: [
@@ -315,56 +419,28 @@ class _ChatPageState extends State<ChatPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          for (int i = 0; i < 3; i++)
-                            Positioned(
-                              left: i * 16.0,
-                              child: Container(
-                                width: 24,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 16,
-                                  color: Color(0xFF2196F3),
-                                ),
-                              ),
-                            ),
-                        ],
+                  const SizedBox(height: 12),
+                  // Join button
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
                       ),
-                      const SizedBox(width: 48),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFBBDEFB),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          '${room['members']} members',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFBBDEFB),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Text(
+                        'Join',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -375,9 +451,5 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  @override
-  void dispose() {
-    Get.delete<ChatLogic>();
-    super.dispose();
-  }
+
 }

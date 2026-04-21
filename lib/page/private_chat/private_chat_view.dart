@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import '../../widgets/empty_state_view.dart';
 import 'private_chat_logic.dart';
 
 class PrivateChatPage extends StatefulWidget {
@@ -44,14 +46,24 @@ class _PrivateChatPageState extends State<PrivateChatPage> {
           ),
           title: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFBBDEFB),
-                  shape: BoxShape.circle,
+              GetBuilder<PrivateChatLogic>(
+                builder: (l) => Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFBBDEFB),
+                    shape: BoxShape.circle,
+                    image: l.userAvatar.isNotEmpty
+                        ? DecorationImage(
+                            image: AssetImage(l.userAvatar),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: l.userAvatar.isEmpty
+                      ? const Icon(Icons.person, size: 24, color: Color(0xFF2196F3))
+                      : null,
                 ),
-                child: const Icon(Icons.person, size: 24, color: Color(0xFF2196F3)),
               ),
               const SizedBox(width: 12),
               GetBuilder<PrivateChatLogic>(
@@ -64,11 +76,11 @@ class _PrivateChatPageState extends State<PrivateChatPage> {
           ),
           centerTitle: false,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.black),
-              onPressed: () {
-                // TODO: Show chat options menu
-              },
+            GetBuilder<PrivateChatLogic>(
+              builder: (l) => IconButton(
+                icon: const Icon(Icons.more_vert, color: Colors.black),
+                onPressed: l.showOptionsMenu,
+              ),
             ),
           ],
         ),
@@ -76,54 +88,66 @@ class _PrivateChatPageState extends State<PrivateChatPage> {
           children: [
             Expanded(
               child: GetBuilder<PrivateChatLogic>(
-                builder: (l) => ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: l.messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = l.messages[index];
-                    return Align(
-                      alignment: msg['isMe'] ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: msg['isMe'] ? Colors.black : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (!msg['isMe'])
+                builder: (l) {
+                  if (l.messages.isEmpty) {
+                    return EmptyStateView(message: 'No messages yet');
+                  }
+                  
+                  // Get current user ID to determine isMe
+                  final box = GetStorage();
+                  final currentUserId = box.read('user_id') as String?;
+                  
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: l.messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = l.messages[index];
+                      final isMe = msg.senderId == currentUserId;
+                      
+                      return Align(
+                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.black : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!isMe)
+                                Text(
+                                  msg.senderName,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2196F3),
+                                  ),
+                                ),
+                              const SizedBox(height: 4),
                               Text(
-                                msg['user'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF2196F3),
+                                msg.content,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isMe ? Colors.white : Colors.black87,
                                 ),
                               ),
-                            const SizedBox(height: 4),
-                            Text(
-                              msg['message'],
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: msg['isMe'] ? Colors.white : Colors.black87,
+                              const SizedBox(height: 4),
+                              Text(
+                                _formatTime(msg.createdAt),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: isMe ? Colors.white70 : Colors.black54,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              msg['time'],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: msg['isMe'] ? Colors.white70 : Colors.black54,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
             Container(
@@ -182,6 +206,24 @@ class _PrivateChatPageState extends State<PrivateChatPage> {
         ),
       ),
     );
+  }
+
+  /// Format DateTime to readable string
+  String _formatTime(DateTime? dateTime) {
+    if (dateTime == null) return '';
+    
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${dateTime.month}/${dateTime.day} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+    }
   }
 
   @override

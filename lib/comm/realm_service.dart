@@ -6,6 +6,9 @@ import '../model/chat_message.dart';
 import '../model/conversation.dart';
 import '../model/settings.dart';
 import '../model/follow.dart';
+import '../model/blocklist.dart';
+import '../model/report.dart';
+import '../model/chat_room.dart';
 
 class RealmService {
   static final RealmService _instance = RealmService._internal();
@@ -29,6 +32,9 @@ class RealmService {
       Conversation.schema,
       Settings.schema,
       Follow.schema,
+      Blocklist.schema,
+      Report.schema,
+      ChatRoom.schema,
     ]);
 
     _realm = Realm(config);
@@ -246,6 +252,46 @@ class RealmService {
     }
   }
 
+  /// 获取用户的私聊会话列表
+  List<Conversation> getPrivateConversations(String userId) {
+    return _realm
+        .all<Conversation>()
+        .where((c) => c.userId != userId)
+        .toList()
+      ..sort((a, b) {
+        final aTime = a.lastMessageTime;
+        final bTime = b.lastMessageTime;
+        if (aTime == null || bTime == null) return 0;
+        return bTime.compareTo(aTime);
+      });
+  }
+
+  /// 创建或更新私聊会话
+  Conversation upsertPrivateConversation({
+    required String userId,
+    required String userName,
+    String? userAvatar,
+    String? lastMessage,
+    DateTime? lastMessageTime,
+    int unreadCount = 0,
+    bool isOnline = false,
+  }) {
+    final conversationId = 'private_$userId';
+    final conversation = Conversation(
+      conversationId,
+      userId,
+      userName,
+      userAvatar: userAvatar,
+      lastMessage: lastMessage,
+      lastMessageTime: lastMessageTime ?? DateTime.now(),
+      unreadCount: unreadCount,
+      isOnline: isOnline,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    return upsertConversation(conversation);
+  }
+
   // ==================== Settings Operations ====================
 
   /// 获取设置
@@ -408,5 +454,155 @@ class RealmService {
         })
         .whereType<User>()
         .toList();
+  }
+
+  // ==================== Blocklist Operations ====================
+
+  /// 拉黑用户
+  void blockUser(String blockerId, String blockedUserId) {
+    final blockId = '${blockerId}_$blockedUserId';
+    final existingBlock = _realm.find<Blocklist>(blockId);
+
+    if (existingBlock == null) {
+      _realm.write(() {
+        _realm.add(Blocklist(blockId, blockerId, blockedUserId, DateTime.now()));
+      });
+    }
+  }
+
+  /// 取消拉黑
+  void unblockUser(String blockerId, String blockedUserId) {
+    final blockId = '${blockerId}_$blockedUserId';
+    final block = _realm.find<Blocklist>(blockId);
+
+    if (block != null) {
+      _realm.write(() {
+        _realm.delete(block);
+      });
+    }
+  }
+
+  /// 检查是否已拉黑
+  bool isBlocked(String blockerId, String blockedUserId) {
+    final blockId = '${blockerId}_$blockedUserId';
+    return _realm.find<Blocklist>(blockId) != null;
+  }
+
+  /// 获取我的黑名单列表
+  List<User> getBlocklistUsers(String userId) {
+    final blocks = _realm
+        .all<Blocklist>()
+        .where((b) => b.blockerId == userId)
+        .toList();
+
+    return blocks
+        .map((b) {
+          return _realm.find<User>(b.blockedUserId);
+        })
+        .whereType<User>()
+        .toList();
+  }
+
+  // ==================== Report Operations ====================
+
+  /// 举报用户
+  void reportUser({
+    required String reporterId,
+    required String reporterName,
+    required String reportedUserId,
+    required String reportedUserName,
+    required String reason,
+    String? description,
+  }) {
+    final reportId = 'report_${DateTime.now().millisecondsSinceEpoch}';
+    final now = DateTime.now();
+    final report = Report(
+      reportId,
+      reporterId,
+      reporterName,
+      reportedUserId,
+      reportedUserName,
+      reason,
+      now,
+      description: description,
+      isResolved: false,
+    );
+
+    _realm.write(() {
+      _realm.add(report);
+    });
+  }
+
+  /// 获取所有举报记录
+  List<Report> getAllReports() {
+    return _realm.all<Report>().toList()..sort((a, b) => b.reportedAt.compareTo(a.reportedAt));
+  }
+
+  /// 获取针对某个用户的举报
+  List<Report> getReportsForUser(String userId) {
+    return _realm
+        .all<Report>()
+        .where((r) => r.reportedUserId == userId)
+        .toList()
+      ..sort((a, b) => b.reportedAt.compareTo(a.reportedAt));
+  }
+
+  /// 标记举报为已处理
+  void markReportAsResolved(String reportId) {
+    final report = _realm.find<Report>(reportId);
+    if (report != null) {
+      _realm.write(() {
+        report.isResolved = true;
+      });
+    }
+  }
+
+  // ==================== Chat Room Operations ====================
+
+  /// 创建或更新聊天室
+  ChatRoom upsertChatRoom(ChatRoom room) {
+    return _realm.write(() {
+      return _realm.add(room, update: true);
+    });
+  }
+
+  /// 获取所有聊天室
+  List<ChatRoom> getAllChatRooms() {
+    return _realm.all<ChatRoom>().toList()
+      ..sort((a, b) => b.membersCount.compareTo(a.membersCount));
+  }
+
+  /// 根据名称获取聊天室
+  ChatRoom? getChatRoomByName(String name) {
+    final rooms = _realm.all<ChatRoom>().where((r) => r.name == name);
+    return rooms.isNotEmpty ? rooms.first : null;
+  }
+
+  /// 获取热门聊天室
+  List<ChatRoom> getHotChatRooms() {
+    return _realm.all<ChatRoom>().where((r) => r.isHot).toList()
+      ..sort((a, b) => b.membersCount.compareTo(a.membersCount));
+  }
+
+  /// 增加聊天室成员数
+  void incrementRoomMembers(String roomId) {
+    final room = _realm.find<ChatRoom>(roomId);
+    if (room != null) {
+      _realm.write(() {
+        room.membersCount += 1;
+        room.updatedAt = DateTime.now();
+      });
+    }
+  }
+
+  /// 减少聊天室成员数
+  void decrementRoomMembers(String roomId) {
+    final room = _realm.find<ChatRoom>(roomId);
+    if (room != null && room.membersCount > 0) {
+      _realm.write(() {
+        room.membersCount -= 1;
+        room.updatedAt = DateTime.now();
+      });
+    }
   }
 }

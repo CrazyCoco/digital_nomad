@@ -1,3 +1,4 @@
+import 'package:digital_nomad/widgets/empty_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -223,6 +224,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Widget _buildCommentsList() {
     return GetBuilder<PostDetailLogic>(
       builder: (l) {
+        if (l.commentsList.isEmpty) {
+          return EmptyStateView(
+            message: 'No comments yet',
+            icon: Icons.chat_bubble_outline,
+          );
+        }
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
