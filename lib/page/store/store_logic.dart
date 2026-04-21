@@ -100,4 +100,12 @@ class StoreLogic extends GetxController {
       loadFriends();
     });
   }
+  
+  /// Navigate to private chat
+  void onChatTap(String userName, String userAvatar) {
+    NavigationUtil.toPrivateChat(
+      userName: userName,
+      userAvatar: userAvatar,
+    );
+  }
 }

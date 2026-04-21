@@ -188,30 +188,35 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildMenuList() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          _buildMenuItem(
-            icon: Icons.settings,
-            title: 'Settings',
-            onTap: logic.onSettings,
+    return GetBuilder<ProfileLogic>(
+      builder: (l) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              _buildMenuItem(
+                icon: Icons.settings,
+                title: 'Settings',
+                onTap: logic.onSettings,
+              ),
+              const SizedBox(height: 12),
+              _buildMenuItem(
+                icon: Icons.person_add,
+                title: 'Friend Requests',
+                onTap: logic.onFriendRequests,
+                showBadge: true,
+                badgeCount: l.friendRequestCount,
+              ),
+              const SizedBox(height: 12),
+              _buildMenuItem(
+                icon: Icons.block,
+                title: 'Blacklist',
+                onTap: logic.onBlacklist,
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.person_add,
-            title: 'Friend Requests',
-            onTap: logic.onFriendRequests,
-            showBadge: true,
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.block,
-            title: 'Blacklist',
-            onTap: logic.onBlacklist,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -220,6 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required String title,
     required VoidCallback onTap,
     bool showBadge = false,
+    int badgeCount = 0,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -243,16 +249,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            if (showBadge)
+            if (showBadge && badgeCount > 0)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: const BoxDecoration(
                   color: Colors.red,
                   shape: BoxShape.circle,
                 ),
-                child: const Text(
-                  '3',
-                  style: TextStyle(
+                child: Text(
+                  '$badgeCount',
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,

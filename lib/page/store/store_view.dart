@@ -123,20 +123,20 @@ class _StorePageState extends State<StorePage> {
                 onDismissed: (direction) {
                   l.removeFriend(index);
                 },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Stack(
-                        children: [
-                          GestureDetector(
-                            onTap: () => l.onUserTap(friend['name']),
-                            child: CircleAvatar(
+                child: GestureDetector(
+                  onTap: () => l.onChatTap(friend['name'], friend['avatar']),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Stack(
+                          children: [
+                            CircleAvatar(
                               radius: 32,
                               backgroundImage: AssetImage(friend['avatar']),
                               backgroundColor: const Color(0xFFE1F5FE),
@@ -148,63 +148,63 @@ class _StorePageState extends State<StorePage> {
                                     )
                                   : null,
                             ),
-                          ),
-                          if (friend['isOnline'])
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF76FF03),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
+                            if (friend['isOnline'])
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF76FF03),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              friend['name'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              friend['bio'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${friend['postsCount']} posts',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black38,
-                              ),
-                            ),
                           ],
                         ),
-                      ),
-                      const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Color(0xFF42A5F5),
-                        size: 24,
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                friend['name'],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                friend['bio'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${friend['postsCount']} posts',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black38,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chat_bubble_outline,
+                          color: Color(0xFF42A5F5),
+                          size: 24,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

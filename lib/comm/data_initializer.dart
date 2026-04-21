@@ -79,6 +79,22 @@ class DataInitializer {
       print('Friend relationships created');
     }
     
+    // 如果没有私聊消息数据，创建种子私聊消息
+    final existingMessages = _realmService.getMessagesByConversation('private_user_2');
+    if (existingMessages.isEmpty && hasUsers) {
+      print('Creating private chat messages...');
+      _createSeedPrivateMessages();
+      print('Private chat messages created');
+    }
+    
+    // 如果没有好友请求数据，创建种子好友请求
+    final existingFriendRequests = _realmService.getReceivedFriendRequests('user_1');
+    if (existingFriendRequests.isEmpty && hasUsers) {
+      print('Creating friend requests...');
+      _createSeedFriendRequests();
+      print('Friend requests created');
+    }
+    
     print('Seed data initialized successfully');
   }
 
@@ -831,5 +847,154 @@ class DataInitializer {
       _realmService.followUser(pair.$1, pair.$2);
       _realmService.followUser(pair.$2, pair.$1);
     }
+  }
+  
+  /// 创建种子私聊消息
+  static void _createSeedPrivateMessages() {
+    final now = DateTime.now();
+    
+    // user_1 和 user_2 (Michael Chen) 的对话
+    final messages1 = [
+      ChatMessage(
+        'msg_private_1_1',
+        'private_user_2',
+        'user_2',
+        'Michael Chen',
+        'Hey Alice! How are you doing?',
+        senderAvatar: 'images/head_2.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(hours: 2)),
+      ),
+      ChatMessage(
+        'msg_private_1_2',
+        'private_user_2',
+        'user_1',
+        'Alice Johnson',
+        'Hi Michael! I\'m great, thanks! Just finished working from a nice cafe.',
+        senderAvatar: 'images/head_1.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(hours: 1, minutes: 45)),
+      ),
+      ChatMessage(
+        'msg_private_1_3',
+        'private_user_2',
+        'user_2',
+        'Michael Chen',
+        'That sounds awesome! Which cafe?',
+        senderAvatar: 'images/head_2.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(hours: 1, minutes: 30)),
+      ),
+      ChatMessage(
+        'msg_private_1_4',
+        'private_user_2',
+        'user_1',
+        'Alice Johnson',
+        'The one near the beach. Great wifi and even better coffee! ☕',
+        senderAvatar: 'images/head_1.jpg',
+        isRead: false,
+        createdAt: now.subtract(const Duration(minutes: 2)),
+      ),
+    ];
+    
+    // user_1 和 user_3 (Sarah Wilson) 的对话
+    final messages2 = [
+      ChatMessage(
+        'msg_private_2_1',
+        'private_user_3',
+        'user_3',
+        'Sarah Wilson',
+        'Hey! Want to join me for lunch tomorrow?',
+        senderAvatar: 'images/head_3.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(hours: 5)),
+      ),
+      ChatMessage(
+        'msg_private_2_2',
+        'private_user_3',
+        'user_1',
+        'Alice Johnson',
+        'Sure! Where should we meet?',
+        senderAvatar: 'images/head_1.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(hours: 4, minutes: 30)),
+      ),
+      ChatMessage(
+        'msg_private_2_3',
+        'private_user_3',
+        'user_3',
+        'Sarah Wilson',
+        'How about that new Italian place downtown?',
+        senderAvatar: 'images/head_3.jpg',
+        isRead: false,
+        createdAt: now.subtract(const Duration(hours: 3)),
+      ),
+    ];
+    
+    // user_1 和 user_4 (David Lee) 的对话
+    final messages3 = [
+      ChatMessage(
+        'msg_private_3_1',
+        'private_user_4',
+        'user_4',
+        'David Lee',
+        'Have you checked out the new coworking space?',
+        senderAvatar: 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(days: 1)),
+      ),
+      ChatMessage(
+        'msg_private_3_2',
+        'private_user_4',
+        'user_1',
+        'Alice Johnson',
+        'Not yet! Is it good?',
+        senderAvatar: 'images/head_1.jpg',
+        isRead: true,
+        createdAt: now.subtract(const Duration(hours: 20)),
+      ),
+      ChatMessage(
+        'msg_private_3_3',
+        'private_user_4',
+        'user_4',
+        'David Lee',
+        'Yeah! Fast internet, quiet zones, and free coffee. You should check it out!',
+        senderAvatar: 'images/11ab81bc0daf3ec42e19a7adfa33bb57.jpg',
+        isRead: false,
+        createdAt: now.subtract(const Duration(hours: 18)),
+      ),
+    ];
+    
+    // Insert all messages
+    for (final msg in [...messages1, ...messages2, ...messages3]) {
+      _realmService.sendMessage(msg);
+    }
+  }
+  
+  /// 创建种子好友请求
+  static void _createSeedFriendRequests() {
+    // user_5 (Emma) -> user_1 (Alice)
+    _realmService.sendFriendRequest(
+      'user_5',
+      'user_1',
+      'Alice Johnson',
+      message: 'Hi Alice! I love your travel content. Let\'s connect!',
+    );
+    
+    // user_2 (Michael) -> user_3 (Sarah)
+    _realmService.sendFriendRequest(
+      'user_2',
+      'user_3',
+      'Sarah Wilson',
+      message: 'Hey Sarah! Want to collaborate on a travel blog?',
+    );
+    
+    // user_4 (David) -> user_5 (Emma)
+    _realmService.sendFriendRequest(
+      'user_4',
+      'user_5',
+      'Emma Davis',
+      message: 'Hi Emma! I saw your photography. Amazing work!',
+    );
   }
 }

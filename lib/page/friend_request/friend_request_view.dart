@@ -114,7 +114,7 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      request['bio'],
+                      request['message'],
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
@@ -123,16 +123,6 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.people, size: 14, color: Colors.black54),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${request['mutualFriends']} mutual friends',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
                         const Icon(Icons.access_time, size: 14, color: Colors.black54),
                         const SizedBox(width: 4),
                         Text(
@@ -142,6 +132,24 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
                             color: Colors.black54,
                           ),
                         ),
+                        if (request['isRead'] == false) ...[
+                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'New',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

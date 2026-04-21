@@ -21,10 +21,14 @@ class ProfileLogic extends GetxController {
   // 帖子列表 - 从 Realm 加载
   List<Map<String, dynamic>> posts = [];
 
+  // Friend request count
+  int friendRequestCount = 0;
+
   @override
   void onInit() {
     super.onInit();
     loadCurrentUser();
+    loadFriendRequestCount();
   }
 
   /// Load current user data from Realm
@@ -100,6 +104,15 @@ class ProfileLogic extends GetxController {
     } else {
       return '${difference.inDays}d ago';
     }
+  }
+
+  /// Load friend request count from Realm
+  void loadFriendRequestCount() {
+    if (currentUserId.isEmpty) return;
+    
+    final requests = _realmService.getReceivedFriendRequests(currentUserId);
+    friendRequestCount = requests.length;
+    update();
   }
 
   @override
