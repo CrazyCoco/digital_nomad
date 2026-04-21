@@ -196,6 +196,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
   Widget _buildChatArea() {
     final box = GetStorage();
     final currentUserId = box.read('user_id') as String?;
+    final maxWidth = MediaQuery.of(context).size.width * 0.7;
 
     return Expanded(
       child: Container(
@@ -215,16 +216,12 @@ class _RoomChatPageState extends State<RoomChatPage> {
               );
             }
 
-            return NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification scrollInfo) {
-                return false;
-              },
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: l.messages.length,
-                reverse: true,
-                itemBuilder: (context, index) {
+            return ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: l.messages.length,
+              reverse: true,
+              itemBuilder: (context, index) {
                   final msg = l.messages[index];
                   final isMe = msg.senderId == currentUserId;
 
@@ -259,7 +256,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                           children: [
                             Container(
                               constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width * 0.7,
+                                maxWidth: maxWidth,
                               ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -316,8 +313,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                     ),
                   );
                 },
-              ),
-            );
+              );
           },
         ),
       ),

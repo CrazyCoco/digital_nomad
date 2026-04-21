@@ -297,7 +297,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         }
         return GridView.builder(
           padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
