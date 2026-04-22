@@ -4,6 +4,9 @@ import '../model/comment.dart';
 import '../model/conversation.dart';
 import '../model/chat_room.dart';
 import '../model/chat_message.dart';
+import '../model/report.dart';
+import '../model/blocklist.dart';
+import '../model/settings.dart';
 import 'realm_service.dart';
 
 class DataInitializer {
@@ -104,6 +107,22 @@ class DataInitializer {
       }
     }
     
+    // 创建种子举报记录
+    final existingReports = _realmService.getAllReports();
+    if (existingReports.isEmpty) {
+      print('Creating seed reports...');
+      _createSeedReports();
+      print('Seed reports created');
+    }
+    
+    // 创建种子黑名单
+    final existingBlocklist = _realmService.getBlocklistUsers('user_1');
+    if (existingBlocklist.isEmpty) {
+      print('Creating seed blocklist...');
+      _createSeedBlocklist();
+      print('Seed blocklist created');
+    }
+    
     print('Seed data initialized successfully');
   }
 
@@ -119,7 +138,8 @@ class DataInitializer {
         following: 342,
         followers: 2048,
         friends: 156,
-        postsCount: 73, // Updated to reflect new posts
+        postsCount: 73,
+        coins: 1000, // 初始金币
         isOnline: true,
         createdAt: now,
         updatedAt: now,
@@ -133,6 +153,7 @@ class DataInitializer {
         followers: 1523,
         friends: 98,
         postsCount: 52,
+        coins: 850,
         isOnline: false,
         createdAt: now,
         updatedAt: now,
@@ -146,6 +167,7 @@ class DataInitializer {
         followers: 3456,
         friends: 234,
         postsCount: 89,
+        coins: 1200,
         isOnline: true,
         createdAt: now,
         updatedAt: now,
@@ -159,6 +181,7 @@ class DataInitializer {
         followers: 5678,
         friends: 312,
         postsCount: 134,
+        coins: 2000,
         isOnline: false,
         createdAt: now,
         updatedAt: now,
@@ -172,6 +195,7 @@ class DataInitializer {
         followers: 4567,
         friends: 189,
         postsCount: 156,
+        coins: 500,
         isOnline: true,
         createdAt: now,
         updatedAt: now,
@@ -1136,5 +1160,56 @@ class DataInitializer {
       'David Lee',
       message: 'Your startup journey is inspiring! Let\'s connect 🚀',
     );
+  }
+  
+  /// 创建种子举报记录
+  static void _createSeedReports() {
+    // 举报 user_5 (Emma)
+    _realmService.reportUser(
+      reporterId: 'user_2',
+      reporterName: 'Michael Chen',
+      reportedUserId: 'user_5',
+      reportedUserName: 'Emma Davis',
+      reason: 'Spam',
+      description: 'This user posts promotional content that seems like spam',
+    );
+    
+    // 举报 user_4 (David)
+    _realmService.reportUser(
+      reporterId: 'user_3',
+      reporterName: 'Sarah Wilson',
+      reportedUserId: 'user_4',
+      reportedUserName: 'David Lee',
+      reason: 'Harassment',
+      description: 'This user is sending inappropriate messages in the group chat',
+    );
+    
+    // 举报 user_3 (Sarah)
+    _realmService.reportUser(
+      reporterId: 'user_4',
+      reporterName: 'David Lee',
+      reportedUserId: 'user_3',
+      reportedUserName: 'Sarah Wilson',
+      reason: 'Misinformation',
+      description: 'This user spreads misleading information',
+    );
+    
+    print('Seed reports created: 3');
+  }
+  
+  /// 创建种子黑名单
+  static void _createSeedBlocklist() {
+    final now = DateTime.now();
+    
+    // user_1 拉黑 user_4
+    _realmService.blockUser('user_1', 'user_4');
+    
+    // user_3 拉黑 user_5
+    _realmService.blockUser('user_3', 'user_5');
+    
+    // user_2 拉黑 user_5
+    _realmService.blockUser('user_2', 'user_5');
+    
+    print('Seed blocklist created: 3');
   }
 }

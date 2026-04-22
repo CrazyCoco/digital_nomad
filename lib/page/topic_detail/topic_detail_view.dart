@@ -6,6 +6,7 @@ import 'topic_detail_logic.dart';
 
 class TopicDetailPage extends StatefulWidget {
   const TopicDetailPage({super.key});
+
   @override
   State<TopicDetailPage> createState() => _TopicDetailPageState();
 }
@@ -45,7 +46,9 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: l.isJoined ? Colors.grey[300] : const Color(0xFF42A5F5),
+                      color: l.isJoined
+                          ? Colors.grey[300]
+                          : const Color(0xFF42A5F5),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -70,7 +73,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                 icon: Icons.explore_outlined,
               );
             }
-            
+
             return ListView(
               padding: const EdgeInsets.all(20),
               children: [
@@ -199,14 +202,19 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                                 CircleAvatar(
                                   radius: 28,
                                   backgroundColor: const Color(0xFFBBDEFB),
-                                  backgroundImage: contributor['avatar'] != null && 
-                                      contributor['avatar'].isNotEmpty
+                                  backgroundImage:
+                                      contributor['avatar'] != null &&
+                                          contributor['avatar'].isNotEmpty
                                       ? AssetImage(contributor['avatar'])
                                       : null,
-                                  child: (contributor['avatar'] == null || 
-                                      contributor['avatar'].isEmpty)
-                                      ? const Icon(Icons.person, size: 28, 
-                                          color: Color(0xFF2196F3))
+                                  child:
+                                      (contributor['avatar'] == null ||
+                                          contributor['avatar'].isEmpty)
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 28,
+                                          color: Color(0xFF2196F3),
+                                        )
                                       : null,
                                 ),
                                 const SizedBox(height: 8),
@@ -249,7 +257,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
       ),
     );
   }
-  
+
   Widget _buildPostCard(Map<String, dynamic> post, int index) {
     return GestureDetector(
       onTap: () => logic.onPostTap(index),
@@ -270,11 +278,16 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                   child: CircleAvatar(
                     radius: 20,
                     backgroundColor: const Color(0xFFBBDEFB),
-                    backgroundImage: post['avatar'] != null && post['avatar'].isNotEmpty
+                    backgroundImage:
+                        post['avatar'] != null && post['avatar'].isNotEmpty
                         ? AssetImage(post['avatar'])
                         : null,
                     child: (post['avatar'] == null || post['avatar'].isEmpty)
-                        ? const Icon(Icons.person, size: 24, color: Color(0xFF2196F3))
+                        ? const Icon(
+                            Icons.person,
+                            size: 24,
+                            color: Color(0xFF2196F3),
+                          )
                         : null,
                   ),
                 ),
@@ -292,7 +305,10 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                       ),
                       Text(
                         post['time'],
-                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
@@ -328,7 +344,9 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                       child: Row(
                         children: [
                           Icon(
-                            post['liked'] ? Icons.favorite : Icons.favorite_border,
+                            post['liked']
+                                ? Icons.favorite
+                                : Icons.favorite_border,
                             size: 20,
                             color: post['liked'] ? Colors.red : Colors.black54,
                           ),
@@ -337,7 +355,9 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                             '${post['likes']}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: post['liked'] ? Colors.red : Colors.black54,
+                              color: post['liked']
+                                  ? Colors.red
+                                  : Colors.black54,
                             ),
                           ),
                         ],
@@ -348,11 +368,18 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                 const SizedBox(width: 16),
                 Row(
                   children: [
-                    const Icon(Icons.comment_outlined, size: 20, color: Colors.black54),
+                    const Icon(
+                      Icons.comment_outlined,
+                      size: 20,
+                      color: Colors.black54,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${post['comments']}',
-                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -361,7 +388,11 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
                   onTap: () => logic.onShare(index),
                   child: Row(
                     children: const [
-                      Icon(Icons.share_outlined, size: 20, color: Colors.black54),
+                      Icon(
+                        Icons.share_outlined,
+                        size: 20,
+                        color: Colors.black54,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Share',
