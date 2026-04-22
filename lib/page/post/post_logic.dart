@@ -190,23 +190,32 @@ class PostLogic extends GetxController {
       
       realmService.upsertUser(updatedUser);
       
-      // TODO: 这里应该创建并保存 Post 到 Realm
-      // final post = Post(
-      //   'post_${DateTime.now().millisecondsSinceEpoch}',
-      //   currentUserId,
-      //   currentUser.name,
-      //   content: content,
-      //   images: images,
-      //   createdAt: DateTime.now(),
-      //   likes: 0,
-      //   commentsCount: 0,
-      //   views: 0,
-      //   shares: 0,
-      // );
-      // realmService.addPost(post);
+      // 创建并保存 Post 到 Realm 数据库
+      final postId = 'post_${DateTime.now().millisecondsSinceEpoch}';
+      final post = Post(
+        postId,
+        currentUserId,
+        currentUser.name,
+        userAvatar: currentUser.avatar,
+        description: content,
+        image: images.isNotEmpty ? images.first : null,
+        isVideo: false,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        views: 0,
+        isLiked: false,
+        category: selectedTab == 0 ? 'Colab' : selectedTab == 1 ? 'Cafe' : 'Outdoor',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
       
-      // 模拟网络请求
-      Future.delayed(const Duration(seconds: 2), () {
+      realmService.createPost(post);
+      
+      print('Post created successfully: $postId');
+      
+      // 发布成功后返回
+      Future.delayed(const Duration(seconds: 1), () {
         EasyLoading.dismiss();
         EasyLoading.showSuccess(
           'Post published successfully! -30 coins. Remaining: $updatedCoins coins',
