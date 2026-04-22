@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+
+import '../../model/chat_message.dart';
+import '../../routes/app_routes.dart';
 import '../../widgets/empty_state_view.dart';
 import 'room_chat_logic.dart';
 
 class RoomChatPage extends StatefulWidget {
   const RoomChatPage({super.key});
+
   @override
   State<RoomChatPage> createState() => _RoomChatPageState();
 }
@@ -56,9 +60,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
             ),
             // Dark overlay
             Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-              ),
+              child: Container(color: Colors.black.withOpacity(0.3)),
             ),
             // Content
             SafeArea(
@@ -66,8 +68,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
                 children: [
                   // Top bar
                   _buildTopBar(),
-                  // Room info card
-                  _buildRoomInfoCard(),
                   // Chat area
                   _buildChatArea(),
                   // Bottom input
@@ -104,9 +104,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
             ),
             child: IconButton(
               icon: const Icon(Icons.more_horiz, color: Colors.white, size: 24),
-              onPressed: () {
-                // TODO: Show options menu
-              },
+              onPressed: _showRoomOptions,
             ),
           ),
         ],
@@ -150,10 +148,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                           height: 28,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ),
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
                           child: ClipOval(
                             child: Image.asset(
@@ -196,7 +191,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
   Widget _buildChatArea() {
     final box = GetStorage();
     final currentUserId = box.read('user_id') as String?;
-    final maxWidth = MediaQuery.of(context).size.width * 0.7;
 
     return Expanded(
       child: Container(
@@ -222,63 +216,71 @@ class _RoomChatPageState extends State<RoomChatPage> {
               itemCount: l.messages.length,
               reverse: true,
               itemBuilder: (context, index) {
-                  final msg = l.messages[index];
-                  final isMe = msg.senderId == currentUserId;
+                final msg = l.messages[index];
+                final isMe = msg.senderId == currentUserId;
 
-                  return Align(
-                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (!isMe) ...[
-                          Container(
-                            width: 36,
-                            height: 36,
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
-                            ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'images/head_${(index % 5) + 1}.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    mainAxisAlignment: isMe
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Other user's avatar (left side)
+                      if (!isMe)
+                        Container(
+                          width: 36,
+                          height: 36,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
-                        ],
-                        Column(
-                          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          child: ClipOval(
+                            child: _buildAvatar(msg.senderAvatar, index),
+                          ),
+                        ),
+                      // Message bubble and timestamp
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              constraints: BoxConstraints(
-                                maxWidth: maxWidth,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isMe ? const Color(0xFFBBDEFB) : Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: const Radius.circular(16),
-                                  topRight: const Radius.circular(16),
-                                  bottomLeft: Radius.circular(isMe ? 16 : 4),
-                                  bottomRight: Radius.circular(isMe ? 4 : 16),
+                            // Message bubble
+                            GestureDetector(
+                              onLongPress: () => _showMessageOptions(msg),
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.7,
                                 ),
-                              ),
-                              child: Text(
-                                msg.content,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: isMe ? Colors.black87 : Colors.black,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isMe
+                                      ? const Color(0xFFBBDEFB)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: const Radius.circular(16),
+                                    topRight: const Radius.circular(16),
+                                    bottomLeft: Radius.circular(isMe ? 16 : 4),
+                                    bottomRight: Radius.circular(isMe ? 4 : 16),
+                                  ),
+                                ),
+                                child: Text(
+                                  msg.content,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: isMe ? Colors.black87 : Colors.black,
+                                  ),
                                 ),
                               ),
                             ),
+                            // Timestamp
                             const SizedBox(height: 4),
                             Text(
                               _formatMessageTime(msg.createdAt),
@@ -289,31 +291,26 @@ class _RoomChatPageState extends State<RoomChatPage> {
                             ),
                           ],
                         ),
-                        if (isMe) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
-                            ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'images/head_1.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                      ),
+                      // My avatar (right side)
+                      if (isMe)
+                        Container(
+                          width: 36,
+                          height: 36,
+                          margin: const EdgeInsets.only(left: 8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
-                        ],
-                      ],
-                    ),
-                  );
-                },
-              );
+                          child: ClipOval(
+                            child: _buildAvatar(msg.senderAvatar, index),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            );
           },
         ),
       ),
@@ -344,10 +341,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: const Color(0xFFBBDEFB),
-                  width: 2,
-                ),
+                border: Border.all(color: const Color(0xFFBBDEFB), width: 2),
               ),
               child: TextField(
                 controller: logic.messageController,
@@ -368,12 +362,166 @@ class _RoomChatPageState extends State<RoomChatPage> {
   /// Format DateTime to readable string (HH:mmAM/PM format)
   String _formatMessageTime(DateTime? dateTime) {
     if (dateTime == null) return '';
-    
+
     final hour = dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour;
     final amPm = dateTime.hour >= 12 ? 'PM' : 'AM';
     final minute = dateTime.minute.toString().padLeft(2, '0');
-    
+
     return '${hour.toString().padLeft(2, '0')}:${minute}$amPm';
+  }
+
+  /// Build avatar image from senderAvatar or fallback to default
+  Widget _buildAvatar(String? avatarPath, int index) {
+    // If avatar path exists and is a local asset
+    if (avatarPath != null && avatarPath.isNotEmpty) {
+      if (avatarPath.startsWith('images/')) {
+        return Image.asset(avatarPath, fit: BoxFit.cover);
+      } else {
+        // Network image
+        return Image.network(avatarPath, fit: BoxFit.cover);
+      }
+    }
+      
+    // Fallback to default avatar based on index
+    final fallbackIndex = (index % 5) + 1;
+    return Image.asset('images/head_$fallbackIndex.jpg', fit: BoxFit.cover);
+  }
+  
+  /// Show message options menu (Report)
+  void _showMessageOptions(ChatMessage message) {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    final isMe = message.senderId == currentUserId;
+  
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (!isMe)
+              ListTile(
+                leading: const Icon(Icons.flag, color: Colors.red),
+                title: const Text(
+                  'Report Message',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Get.back();
+                  logic.onReportMessage(message);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.copy, color: Colors.blue),
+              title: const Text(
+                'Copy Message',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () {
+                Get.back();
+                // TODO: Copy message to clipboard
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Show room options menu (Report Room)
+  void _showRoomOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.flag, color: Colors.red),
+              title: const Text(
+                'Report Room',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: Text(
+                'Report ${logic.roomName} for inappropriate content',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                ),
+              ),
+              onTap: () {
+                Get.back();
+                _reportRoom();
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Report the current room
+  void _reportRoom() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId == null) return;
+    
+    // Get reporter info
+    final currentUser = logic.getReporterInfo();
+    
+    NavigationUtil.toReport(
+      reportedType: 'room',
+      reportedUserName: logic.roomName,
+      reportedContent: 'Chat Room: ${logic.roomName}',
+    );
   }
 
   @override

@@ -6,6 +6,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../comm/data_initializer.dart';
 import '../../comm/realm_service.dart';
 import '../../routes/app_routes.dart';
 
@@ -86,6 +87,10 @@ class SignInLogic extends GetxController {
           
           developer.log('Current user: ${currentUser.name}');
         }
+        
+        // Ensure seed data is initialized after login
+        developer.log('Ensuring seed data is initialized...');
+        DataInitializer.initializeSeedData();
         
         // Navigate to home page
         NavigationUtil.toMainTab();

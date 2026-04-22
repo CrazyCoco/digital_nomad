@@ -25,6 +25,8 @@ class DataInitializer {
     final existingFollowing = _realmService.getFollowingUsers('user_1');
     final hasFriends = existingFollowing.length >= 3;
     
+    print('Has users: $hasUsers, Has rooms: $hasRooms, Has friends: $hasFriends');
+    
     if (hasUsers && hasRooms && hasFriends) {
       print('All seed data already exists, skipping initialization');
       return;
@@ -72,27 +74,34 @@ class DataInitializer {
       print('Seed Messages: ${seedMessages.length}');
     }
     
-    // 如果没有好友关系数据，创建种子好友关系
-    if (!hasFriends && hasUsers) {
+    // 如果没有好友关系数据，或者好友关系不完整，创建种子好友关系
+    if ((!hasFriends || !hasUsers) && hasUsers) {
       print('Creating friend relationships...');
       _createSeedFriendRelationships();
       print('Friend relationships created');
+    } else if (!hasFriends && !hasUsers) {
+      // 如果既没有用户也没有好友关系，先跳过，等用户创建后再处理
+      print('Skipping friend relationships - users not created yet');
     }
     
     // 如果没有私聊消息数据，创建种子私聊消息
-    final existingMessages = _realmService.getMessagesByConversation('private_user_2');
-    if (existingMessages.isEmpty && hasUsers) {
-      print('Creating private chat messages...');
-      _createSeedPrivateMessages();
-      print('Private chat messages created');
+    if (hasUsers) {
+      final existingMessages = _realmService.getMessagesByConversation('private_user_2');
+      if (existingMessages.isEmpty) {
+        print('Creating private chat messages...');
+        _createSeedPrivateMessages();
+        print('Private chat messages created');
+      }
     }
     
     // 如果没有好友请求数据，创建种子好友请求
-    final existingFriendRequests = _realmService.getReceivedFriendRequests('user_1');
-    if (existingFriendRequests.isEmpty && hasUsers) {
-      print('Creating friend requests...');
-      _createSeedFriendRequests();
-      print('Friend requests created');
+    if (hasUsers) {
+      final existingFriendRequests = _realmService.getReceivedFriendRequests('user_1');
+      if (existingFriendRequests.isEmpty) {
+        print('Creating friend requests...');
+        _createSeedFriendRequests();
+        print('Friend requests created');
+      }
     }
     
     print('Seed data initialized successfully');
@@ -110,7 +119,7 @@ class DataInitializer {
         following: 342,
         followers: 2048,
         friends: 156,
-        postsCount: 67,
+        postsCount: 73, // Updated to reflect new posts
         isOnline: true,
         createdAt: now,
         updatedAt: now,
@@ -337,6 +346,117 @@ class DataInitializer {
         category: 'Outdoor',
         weather: 'partly_cloudy',
         createdAt: now.subtract(const Duration(hours: 12)),
+        updatedAt: now,
+      ),
+      // Additional photo posts for Alice (user_1)
+      Post(
+        'post_10',
+        'user_1',
+        'Alice Johnson',
+        userAvatar: 'images/head_1.jpg',
+        description: 'Beautiful sunset from my balcony 🌅 Perfect end to a productive day!',
+        image: 'images/8952cc30813886ec84178206d8877d23.jpg',
+        isVideo: false,
+        likes: 128,
+        comments: 34,
+        shares: 12,
+        views: 1520,
+        isLiked: false,
+        category: 'Cafe',
+        weather: 'sunny',
+        createdAt: now.subtract(const Duration(hours: 1)),
+        updatedAt: now,
+      ),
+      Post(
+        'post_11',
+        'user_1',
+        'Alice Johnson',
+        userAvatar: 'images/head_1.jpg',
+        description: 'My favorite corner in this cozy cafe ☕ Great wifi and even better vibes!',
+        image: 'images/948f9b32fa7f2957bc82ec3100b057aa.jpg',
+        isVideo: false,
+        likes: 95,
+        comments: 21,
+        shares: 8,
+        views: 980,
+        isLiked: false,
+        category: 'Cafe',
+        weather: 'cloudy',
+        createdAt: now.subtract(const Duration(hours: 4)),
+        updatedAt: now,
+      ),
+      Post(
+        'post_12',
+        'user_1',
+        'Alice Johnson',
+        userAvatar: 'images/head_1.jpg',
+        description: 'Morning yoga session before work 🧘‍♀️ Starting the day right!',
+        image: 'images/afc548276bf301d627730fb09e06be7f.jpg',
+        isVideo: false,
+        likes: 156,
+        comments: 42,
+        shares: 15,
+        views: 2100,
+        isLiked: false,
+        category: 'Outdoor',
+        weather: 'sunny',
+        createdAt: now.subtract(const Duration(hours: 6)),
+        updatedAt: now,
+      ),
+      Post(
+        'post_13',
+        'user_1',
+        'Alice Johnson',
+        userAvatar: 'images/head_1.jpg',
+        description: 'New laptop setup for maximum productivity 💻✨ What do you think?',
+        image: 'images/094de2a3d0f251804bbdf971c36c97ad.jpg',
+        isVideo: false,
+        likes: 203,
+        comments: 56,
+        shares: 23,
+        views: 3200,
+        isLiked: false,
+        category: 'Colab',
+        weather: 'sunny',
+        createdAt: now.subtract(const Duration(days: 1)),
+        updatedAt: now,
+      ),
+      Post(
+        'post_14',
+        'user_1',
+        'Alice Johnson',
+        userAvatar: 'images/head_1.jpg',
+        description: 'Exploring hidden streets in Chiang Mai 🛵 Every corner has a story!',
+        image: 'images/16dcb0bf7d0f122690c0b0e1916494d4.jpg',
+        isVideo: false,
+        likes: 178,
+        comments: 38,
+        shares: 19,
+        views: 2450,
+        isLiked: false,
+        category: 'Outdoor',
+        weather: 'sunny',
+        createdAt: now.subtract(const Duration(days: 2)),
+        updatedAt: now,
+      ),
+      // Additional video post for Alice
+      Post(
+        'post_15',
+        'user_1',
+        'Alice Johnson',
+        userAvatar: 'images/head_1.jpg',
+        description: 'Quick tour of my current workspace! Love the natural light here 🌞',
+        image: 'images/17faa625fce16f5d297a2e29dd15f716.jpg',
+        videoPath: 'images/100cbbc25bf271dc459d54e00fc218e9_720w.mp4',
+        isVideo: true,
+        likes: 234,
+        comments: 67,
+        shares: 28,
+        views: 4100,
+        isLiked: false,
+        category: 'Colab',
+        weather: 'sunny',
+        createdAt: now.subtract(const Duration(hours: 3)),
         updatedAt: now,
       ),
     ];
