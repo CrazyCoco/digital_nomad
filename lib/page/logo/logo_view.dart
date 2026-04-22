@@ -15,7 +15,11 @@ class _LogoPageState extends State<LogoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return SizedBox(
+      width: Get.width,
+      height: Get.height,
+      child: Image.asset("images/启动.png", width: Get.width, height: Get.height),
+    );
   }
 
   @override
