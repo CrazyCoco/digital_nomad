@@ -4,13 +4,17 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+
+import '../../comm/realm_service.dart';
+import '../../model/user.dart';
 
 class RechargeLogic extends GetxController {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   
-  int currentBalance = 1000;
+  int currentBalance = 0;  // 从 Realm 加载真实余额
   bool isAvailable = false;
   bool isLoading = false;
   List<ProductDetails> products = [];
@@ -34,7 +38,30 @@ class RechargeLogic extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadUserBalance();  // 先加载用户余额
     _initializeInAppPurchase();
+  }
+  
+  /// 从 Realm 加载用户真实余额
+  void _loadUserBalance() {
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId != null) {
+      final realmService = RealmService();
+      final currentUser = realmService.getUserById(currentUserId);
+      
+      if (currentUser != null) {
+        currentBalance = currentUser.coins;
+        print('Loaded user balance: $currentBalance coins');
+      } else {
+        currentBalance = 1000;  // 默认值
+      }
+    } else {
+      currentBalance = 1000;  // 未登录默认值
+    }
+    
+    update();
   }
   
   /// 初始化内购
@@ -113,20 +140,60 @@ class RechargeLogic extends GetxController {
     final coins = productCoinsMap[productId];
     
     if (coins != null) {
-      // 增加余额
-      currentBalance += coins;
+      // 获取当前用户
+      final box = GetStorage();
+      final currentUserId = box.read('user_id') as String?;
+      
+      if (currentUserId == null) {
+        print('Error: User not logged in');
+        return;
+      }
+      
+      final realmService = RealmService();
+      final currentUser = realmService.getUserById(currentUserId);
+      
+      if (currentUser == null) {
+        print('Error: User not found');
+        return;
+      }
+      
+      // 增加余额并保存到 Realm
+      final updatedCoins = currentUser.coins + coins;
+      final updatedUser = User(
+        currentUser.id,
+        currentUser.name,
+        avatar: currentUser.avatar,
+        bio: currentUser.bio,
+        title: currentUser.title,
+        gender: currentUser.gender,
+        location: currentUser.location,
+        following: currentUser.following,
+        followers: currentUser.followers,
+        friends: currentUser.friends,
+        postsCount: currentUser.postsCount,
+        coins: updatedCoins,
+        isOnline: currentUser.isOnline,
+        createdAt: currentUser.createdAt,
+        updatedAt: DateTime.now(),
+      );
+      
+      realmService.upsertUser(updatedUser);
+      
+      // 更新本地余额
+      currentBalance = updatedCoins;
       update();
       
       // 显示成功提示
       Get.snackbar(
         'Success',
-        'Recharged $coins coins!',
+        'Recharged $coins coins! Balance: $updatedCoins coins',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
       
-      print('Purchase verified: $productId - $coins coins added');
+      print('Purchase verified: $productId - $coins coins added. Total: $updatedCoins');
     } else {
       print('Unknown product: $productId');
     }

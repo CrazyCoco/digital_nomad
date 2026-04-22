@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../comm/realm_service.dart';
+import '../../model/post.dart';
+import '../../model/user.dart';
 
 class PostLogic extends GetxController {
   final ImagePicker _picker = ImagePicker();
@@ -134,13 +139,84 @@ class PostLogic extends GetxController {
       return;
     }
     
+    // 检查金币余额
+    final box = GetStorage();
+    final currentUserId = box.read('user_id') as String?;
+    
+    if (currentUserId == null) {
+      EasyLoading.showError('Please login first');
+      return;
+    }
+    
+    final realmService = RealmService();
+    final currentUser = realmService.getUserById(currentUserId);
+    
+    if (currentUser == null) {
+      EasyLoading.showError('User not found');
+      return;
+    }
+    
+    // 检查金币是否足够
+    if (currentUser.coins < 30) {
+      EasyLoading.showError(
+        'Insufficient coins. You need 30 coins to post, but you only have ${currentUser.coins} coins.',
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+    
     EasyLoading.show(status: 'Posting...');
     
-    // TODO: Implement post logic with backend
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      // 扣除30金币
+      final updatedCoins = currentUser.coins - 30;
+      final updatedUser = User(
+        currentUser.id,
+        currentUser.name,
+        avatar: currentUser.avatar,
+        bio: currentUser.bio,
+        title: currentUser.title,
+        gender: currentUser.gender,
+        location: currentUser.location,
+        following: currentUser.following,
+        followers: currentUser.followers,
+        friends: currentUser.friends,
+        postsCount: currentUser.postsCount + 1,
+        coins: updatedCoins,
+        isOnline: currentUser.isOnline,
+        createdAt: currentUser.createdAt,
+        updatedAt: DateTime.now(),
+      );
+      
+      realmService.upsertUser(updatedUser);
+      
+      // TODO: 这里应该创建并保存 Post 到 Realm
+      // final post = Post(
+      //   'post_${DateTime.now().millisecondsSinceEpoch}',
+      //   currentUserId,
+      //   currentUser.name,
+      //   content: content,
+      //   images: images,
+      //   createdAt: DateTime.now(),
+      //   likes: 0,
+      //   commentsCount: 0,
+      //   views: 0,
+      //   shares: 0,
+      // );
+      // realmService.addPost(post);
+      
+      // 模拟网络请求
+      Future.delayed(const Duration(seconds: 2), () {
+        EasyLoading.dismiss();
+        EasyLoading.showSuccess(
+          'Post published successfully! -30 coins. Remaining: $updatedCoins coins',
+        );
+        Get.back();
+      });
+    } catch (e) {
       EasyLoading.dismiss();
-      EasyLoading.showSuccess('Post published successfully');
-      Get.back();
-    });
+      EasyLoading.showError('Failed to post: $e');
+      print('Error posting: $e');
+    }
   }
 }

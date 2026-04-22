@@ -17,6 +17,7 @@ class _User {
   int followers = 0;
   int friends = 0;
   int postsCount = 0;
+  int coins = 1000; // 金币余额，默认1000
   bool isOnline = false;
   DateTime? createdAt;
   DateTime? updatedAt;

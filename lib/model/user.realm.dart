@@ -24,6 +24,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
     int followers = 0,
     int friends = 0,
     int postsCount = 0,
+    int coins = 1000,
     bool isOnline = false,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -34,6 +35,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
         'followers': 0,
         'friends': 0,
         'postsCount': 0,
+        'coins': 1000,
         'isOnline': false,
       });
     }
@@ -48,6 +50,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'followers', followers);
     RealmObjectBase.set(this, 'friends', friends);
     RealmObjectBase.set(this, 'postsCount', postsCount);
+    RealmObjectBase.set(this, 'coins', coins);
     RealmObjectBase.set(this, 'isOnline', isOnline);
     RealmObjectBase.set(this, 'createdAt', createdAt);
     RealmObjectBase.set(this, 'updatedAt', updatedAt);
@@ -112,6 +115,11 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
   set postsCount(int value) => RealmObjectBase.set(this, 'postsCount', value);
 
   @override
+  int get coins => RealmObjectBase.get<int>(this, 'coins') as int;
+  @override
+  set coins(int value) => RealmObjectBase.set(this, 'coins', value);
+
+  @override
   bool get isOnline => RealmObjectBase.get<bool>(this, 'isOnline') as bool;
   @override
   set isOnline(bool value) => RealmObjectBase.set(this, 'isOnline', value);
@@ -154,6 +162,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
       'followers': followers.toEJson(),
       'friends': friends.toEJson(),
       'postsCount': postsCount.toEJson(),
+      'coins': coins.toEJson(),
       'isOnline': isOnline.toEJson(),
       'createdAt': createdAt.toEJson(),
       'updatedAt': updatedAt.toEJson(),
@@ -176,6 +185,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
         followers: fromEJson(ejson['followers'], defaultValue: 0),
         friends: fromEJson(ejson['friends'], defaultValue: 0),
         postsCount: fromEJson(ejson['postsCount'], defaultValue: 0),
+        coins: fromEJson(ejson['coins'], defaultValue: 1000),
         isOnline: fromEJson(ejson['isOnline'], defaultValue: false),
         createdAt: fromEJson(ejson['createdAt']),
         updatedAt: fromEJson(ejson['updatedAt']),
@@ -199,6 +209,7 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('followers', RealmPropertyType.int),
       SchemaProperty('friends', RealmPropertyType.int),
       SchemaProperty('postsCount', RealmPropertyType.int),
+      SchemaProperty('coins', RealmPropertyType.int),
       SchemaProperty('isOnline', RealmPropertyType.bool),
       SchemaProperty('createdAt', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('updatedAt', RealmPropertyType.timestamp, optional: true),

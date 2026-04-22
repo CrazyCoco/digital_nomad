@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../comm/data_initializer.dart';
 import '../../comm/realm_service.dart';
+import '../../model/user.dart';
 import '../../routes/app_routes.dart';
 
 class SignInLogic extends GetxController {
@@ -85,7 +86,30 @@ class SignInLogic extends GetxController {
           box.write('user_id', currentUser.id);
           box.write('username', currentUser.name);
           
-          developer.log('Current user: ${currentUser.name}');
+          // Initialize coins to 1000 for first login
+          if (currentUser.coins == 0) {
+            final updatedUser = User(
+              currentUser.id,
+              currentUser.name,
+              avatar: currentUser.avatar,
+              bio: currentUser.bio,
+              title: currentUser.title,
+              gender: currentUser.gender,
+              location: currentUser.location,
+              following: currentUser.following,
+              followers: currentUser.followers,
+              friends: currentUser.friends,
+              postsCount: currentUser.postsCount,
+              coins: 1000,
+              isOnline: currentUser.isOnline,
+              createdAt: currentUser.createdAt,
+              updatedAt: DateTime.now(),
+            );
+            realmService.upsertUser(updatedUser);
+            developer.log('Initialized user coins to 1000');
+          }
+          
+          developer.log('Current user: ${currentUser.name}, Coins: ${currentUser.coins}');
         }
         
         // Ensure seed data is initialized after login
