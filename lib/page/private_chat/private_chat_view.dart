@@ -76,6 +76,14 @@ class _PrivateChatPageState extends State<PrivateChatPage> {
           ),
           centerTitle: false,
           actions: [
+            // Video call button
+            GetBuilder<PrivateChatLogic>(
+              builder: (l) => IconButton(
+                icon: const Icon(Icons.videocam, color: Colors.black),
+                onPressed: l.startVideoCall,
+              ),
+            ),
+            // More options button
             GetBuilder<PrivateChatLogic>(
               builder: (l) => IconButton(
                 icon: const Icon(Icons.more_vert, color: Colors.black),

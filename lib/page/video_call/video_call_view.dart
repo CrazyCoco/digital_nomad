@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,7 +30,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 ),
               ),
             ),
-            // Self video (picture in picture)
+            // Self video (picture in picture) - Show real camera preview
             Positioned(
               top: 60,
               right: 20,
@@ -42,9 +43,10 @@ class _VideoCallPageState extends State<VideoCallPage> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: l.isVideoOff
-                      ? const Center(child: Icon(Icons.videocam_off, size: 40, color: Colors.white54))
-                      : const Center(child: Icon(Icons.person, size: 60, color: Colors.white54)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: _buildCameraPreview(l),
+                  ),
                 ),
               ),
             ),
@@ -147,6 +149,32 @@ class _VideoCallPageState extends State<VideoCallPage> {
         ],
       ),
     );
+  }
+  
+  /// Build camera preview widget
+  Widget _buildCameraPreview(VideoCallLogic logic) {
+    // If video is off, show placeholder
+    if (logic.isVideoOff) {
+      return Container(
+        color: Colors.grey[800],
+        child: const Center(
+          child: Icon(Icons.videocam_off, size: 40, color: Colors.white54),
+        ),
+      );
+    }
+    
+    // If camera is not initialized, show loading
+    if (!logic.isCameraInitialized || logic.cameraController == null) {
+      return Container(
+        color: Colors.grey[800],
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+    
+    // Show real camera preview
+    return CameraPreview(logic.cameraController!);
   }
 
   @override

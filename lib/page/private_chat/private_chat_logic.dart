@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../comm/realm_service.dart';
 import '../../model/chat_message.dart';
 import '../../model/user.dart';
+import '../../routes/app_routes.dart';
 
 class PrivateChatLogic extends GetxController {
   final RealmService _realmService = RealmService();
@@ -86,6 +88,91 @@ class PrivateChatLogic extends GetxController {
   }
   
   void onBack() => Get.back();
+  
+  /// Start video call with permission check
+  Future<void> startVideoCall() async {
+    if (userId.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'User information not available',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    
+    // Check camera and microphone permissions
+    final hasPermission = await _checkVideoCallPermissions();
+    
+    if (hasPermission) {
+      // Navigate to video call page
+      NavigationUtil.toVideoCall(userName: userName);
+    }
+  }
+  
+  /// Check camera and microphone permissions
+  Future<bool> _checkVideoCallPermissions() async {
+    // Check camera permission
+    var cameraStatus = await Permission.camera.status;
+    var micStatus = await Permission.microphone.status;
+    
+    // Request permissions if denied
+    if (cameraStatus.isDenied || cameraStatus.isPermanentlyDenied) {
+      cameraStatus = await Permission.camera.request();
+    }
+    
+    if (micStatus.isDenied || micStatus.isPermanentlyDenied) {
+      micStatus = await Permission.microphone.request();
+    }
+    
+    // Check if both permissions are granted
+    if (cameraStatus.isGranted && micStatus.isGranted) {
+      return true;
+    }
+    
+    // Show permission denied dialog
+    _showPermissionDeniedDialog(cameraStatus, micStatus);
+    return false;
+  }
+  
+  /// Show permission denied dialog with option to open settings
+  void _showPermissionDeniedDialog(PermissionStatus cameraStatus, PermissionStatus micStatus) {
+    final missingPermissions = <String>[];
+    
+    if (!cameraStatus.isGranted) {
+      missingPermissions.add('Camera');
+    }
+    
+    if (!micStatus.isGranted) {
+      missingPermissions.add('Microphone');
+    }
+    
+    final permissionText = missingPermissions.join(' and ');
+    
+    showCupertinoDialog(
+      context: Get.context!,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Permission Required'),
+        content: Text(
+          'Video call requires $permissionText permission. '
+          'Please enable it in Settings to continue.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Get.back(),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('Open Settings'),
+            onPressed: () {
+              Get.back();
+              openAppSettings();
+            },
+          ),
+        ],
+      ),
+    );
+  }
   
   /// Show chat options menu (Block & Report)
   void showOptionsMenu() {

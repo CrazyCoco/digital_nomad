@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../comm/realm_service.dart';
 import '../../model/chat_message.dart';
@@ -8,6 +11,7 @@ import '../../routes/app_routes.dart';
 
 class RoomChatLogic extends GetxController {
   final RealmService _realmService = RealmService();
+  final ImagePicker _picker = ImagePicker();
   
   String roomName = '';
   int membersCount = 0;
@@ -82,6 +86,55 @@ class RoomChatLogic extends GetxController {
   }
   
   void onBack() => Get.back();
+  
+  /// Pick and send image
+  Future<void> pickAndSendImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      
+      if (image == null) return;
+      
+      final box = GetStorage();
+      final currentUserId = box.read('user_id') as String?;
+      
+      if (currentUserId == null) return;
+      
+      // Get user info
+      final currentUser = _realmService.getUserById(currentUserId);
+      final currentUserName = currentUser?.name ?? 'You';
+      final userAvatar = currentUser?.avatar;
+      
+      final now = DateTime.now();
+      final messageId = 'msg_img_${now.millisecondsSinceEpoch}';
+      
+      // Create message with image path
+      final message = ChatMessage(
+        messageId,
+        conversationId,
+        currentUserId,
+        currentUserName,
+        '', // Empty text for image message
+        senderAvatar: userAvatar,
+        imageUrl: image.path, // Store image path in imageUrl field
+        messageType: 1, // 1 for image
+        isRead: false,
+        createdAt: now,
+      );
+      
+      _realmService.sendMessage(message);
+      
+      // Reload messages
+      loadMessages();
+      update();
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
   
   /// Report a message
   void onReportMessage(ChatMessage message) {
