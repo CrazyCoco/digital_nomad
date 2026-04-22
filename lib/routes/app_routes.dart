@@ -119,8 +119,8 @@ class NavigationUtil {
   }
 
   /// 跳转到编辑资料
-  static void toEditProfile() {
-    Get.toNamed(AppRoutes.editProfile);
+  static Future<dynamic>? toEditProfile() {
+    return Get.toNamed(AppRoutes.editProfile);
   }
 
   /// 跳转到关注/粉丝/朋友列表

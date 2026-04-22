@@ -24,6 +24,7 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
     int likes = 0,
     int comments = 0,
     int shares = 0,
+    int views = 0,
     bool isLiked = false,
     String? category,
     String? weather,
@@ -36,6 +37,7 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
         'likes': 0,
         'comments': 0,
         'shares': 0,
+        'views': 0,
         'isLiked': false,
       });
     }
@@ -50,6 +52,7 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'likes', likes);
     RealmObjectBase.set(this, 'comments', comments);
     RealmObjectBase.set(this, 'shares', shares);
+    RealmObjectBase.set(this, 'views', views);
     RealmObjectBase.set(this, 'isLiked', isLiked);
     RealmObjectBase.set(this, 'category', category);
     RealmObjectBase.set(this, 'weather', weather);
@@ -121,6 +124,11 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
   set shares(int value) => RealmObjectBase.set(this, 'shares', value);
 
   @override
+  int get views => RealmObjectBase.get<int>(this, 'views') as int;
+  @override
+  set views(int value) => RealmObjectBase.set(this, 'views', value);
+
+  @override
   bool get isLiked => RealmObjectBase.get<bool>(this, 'isLiked') as bool;
   @override
   set isLiked(bool value) => RealmObjectBase.set(this, 'isLiked', value);
@@ -175,6 +183,7 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
       'likes': likes.toEJson(),
       'comments': comments.toEJson(),
       'shares': shares.toEJson(),
+      'views': views.toEJson(),
       'isLiked': isLiked.toEJson(),
       'category': category.toEJson(),
       'weather': weather.toEJson(),
@@ -204,6 +213,7 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
           likes: fromEJson(ejson['likes'], defaultValue: 0),
           comments: fromEJson(ejson['comments'], defaultValue: 0),
           shares: fromEJson(ejson['shares'], defaultValue: 0),
+          views: fromEJson(ejson['views'], defaultValue: 0),
           isLiked: fromEJson(ejson['isLiked'], defaultValue: false),
           category: fromEJson(ejson['category']),
           weather: fromEJson(ejson['weather']),
@@ -229,6 +239,7 @@ class Post extends _Post with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('likes', RealmPropertyType.int),
       SchemaProperty('comments', RealmPropertyType.int),
       SchemaProperty('shares', RealmPropertyType.int),
+      SchemaProperty('views', RealmPropertyType.int),
       SchemaProperty('isLiked', RealmPropertyType.bool),
       SchemaProperty('category', RealmPropertyType.string, optional: true),
       SchemaProperty('weather', RealmPropertyType.string, optional: true),

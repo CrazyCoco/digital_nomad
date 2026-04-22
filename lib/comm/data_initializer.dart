@@ -839,7 +839,10 @@ class DataInitializer {
       ('user_1', 'user_5'),
       ('user_2', 'user_3'),
       ('user_2', 'user_4'),
+      ('user_2', 'user_5'),
+      ('user_3', 'user_4'),
       ('user_3', 'user_5'),
+      ('user_4', 'user_5'),
     ];
     
     for (final pair in friendPairs) {
@@ -995,6 +998,23 @@ class DataInitializer {
       'user_5',
       'Emma Davis',
       message: 'Hi Emma! I saw your photography. Amazing work!',
+    );
+    
+    // Additional friend requests for variety
+    // user_3 (Sarah) -> user_1 (Alice)
+    _realmService.sendFriendRequest(
+      'user_3',
+      'user_1',
+      'Alice Johnson',
+      message: 'Love your cafe recommendations! Would love to meet up sometime ☕',
+    );
+    
+    // user_1 (Alice) -> user_4 (David)
+    _realmService.sendFriendRequest(
+      'user_1',
+      'user_4',
+      'David Lee',
+      message: 'Your startup journey is inspiring! Let\'s connect 🚀',
     );
   }
 }

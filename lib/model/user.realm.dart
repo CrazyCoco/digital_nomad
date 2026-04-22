@@ -17,6 +17,9 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
     String name, {
     String? avatar,
     String? bio,
+    String? title,
+    String? gender,
+    String? location,
     int following = 0,
     int followers = 0,
     int friends = 0,
@@ -38,6 +41,9 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'name', name);
     RealmObjectBase.set(this, 'avatar', avatar);
     RealmObjectBase.set(this, 'bio', bio);
+    RealmObjectBase.set(this, 'title', title);
+    RealmObjectBase.set(this, 'gender', gender);
+    RealmObjectBase.set(this, 'location', location);
     RealmObjectBase.set(this, 'following', following);
     RealmObjectBase.set(this, 'followers', followers);
     RealmObjectBase.set(this, 'friends', friends);
@@ -68,6 +74,22 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
   String? get bio => RealmObjectBase.get<String>(this, 'bio') as String?;
   @override
   set bio(String? value) => RealmObjectBase.set(this, 'bio', value);
+
+  @override
+  String? get title => RealmObjectBase.get<String>(this, 'title') as String?;
+  @override
+  set title(String? value) => RealmObjectBase.set(this, 'title', value);
+
+  @override
+  String? get gender => RealmObjectBase.get<String>(this, 'gender') as String?;
+  @override
+  set gender(String? value) => RealmObjectBase.set(this, 'gender', value);
+
+  @override
+  String? get location =>
+      RealmObjectBase.get<String>(this, 'location') as String?;
+  @override
+  set location(String? value) => RealmObjectBase.set(this, 'location', value);
 
   @override
   int get following => RealmObjectBase.get<int>(this, 'following') as int;
@@ -125,6 +147,9 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
       'name': name.toEJson(),
       'avatar': avatar.toEJson(),
       'bio': bio.toEJson(),
+      'title': title.toEJson(),
+      'gender': gender.toEJson(),
+      'location': location.toEJson(),
       'following': following.toEJson(),
       'followers': followers.toEJson(),
       'friends': friends.toEJson(),
@@ -144,6 +169,9 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
         fromEJson(name),
         avatar: fromEJson(ejson['avatar']),
         bio: fromEJson(ejson['bio']),
+        title: fromEJson(ejson['title']),
+        gender: fromEJson(ejson['gender']),
+        location: fromEJson(ejson['location']),
         following: fromEJson(ejson['following'], defaultValue: 0),
         followers: fromEJson(ejson['followers'], defaultValue: 0),
         friends: fromEJson(ejson['friends'], defaultValue: 0),
@@ -164,6 +192,9 @@ class User extends _User with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('name', RealmPropertyType.string),
       SchemaProperty('avatar', RealmPropertyType.string, optional: true),
       SchemaProperty('bio', RealmPropertyType.string, optional: true),
+      SchemaProperty('title', RealmPropertyType.string, optional: true),
+      SchemaProperty('gender', RealmPropertyType.string, optional: true),
+      SchemaProperty('location', RealmPropertyType.string, optional: true),
       SchemaProperty('following', RealmPropertyType.int),
       SchemaProperty('followers', RealmPropertyType.int),
       SchemaProperty('friends', RealmPropertyType.int),

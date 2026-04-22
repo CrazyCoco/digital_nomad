@@ -14,6 +14,11 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final ProfileLogic logic = Get.put(ProfileLogic());
 
+  /// Format user ID to numeric display
+  String _formatUserId(String userId) {
+    return logic.formatUserId(userId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -82,43 +87,85 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildProfileInfo() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 40,
-            backgroundColor: Color(0xFFBBDEFB),
-            backgroundImage: AssetImage('images/head_1.jpg'),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('Judy', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              Text('ID 2379257937', style: TextStyle(fontSize: 14, color: Colors.black54)),
+    return GetBuilder<ProfileLogic>(
+      builder: (l) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: const Color(0xFFBBDEFB),
+                backgroundImage: l.currentUserAvatar.startsWith('images/')
+                    ? AssetImage(l.currentUserAvatar) as ImageProvider
+                    : (l.currentUserAvatar.isNotEmpty
+                        ? NetworkImage(l.currentUserAvatar)
+                        : const AssetImage('images/head_1.jpg')),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l.currentUserName,
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (l.currentUserTitle.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFB74D),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              l.currentUserTitle,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      'ID ${_formatUserId(l.currentUserId)}',
+                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: logic.onEditProfile,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black54),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.edit, size: 16, color: Colors.black54),
+                      SizedBox(width: 4),
+                      Text('Edit Profile', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
-          const Spacer(),
-          GestureDetector(
-            onTap: logic.onEditProfile,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black54),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.edit, size: 16, color: Colors.black54),
-                  SizedBox(width: 4),
-                  Text('Edit Profile', style: TextStyle(fontSize: 14, color: Colors.black54)),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -137,15 +184,24 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               GestureDetector(
                 onTap: l.onFollowing,
-                child: const _StatItem(count: '1900', label: 'Following'),
+                child: _StatItem(
+                  count: '${l.followingCount}',
+                  label: 'Following',
+                ),
               ),
               GestureDetector(
                 onTap: l.onFollowers,
-                child: const _StatItem(count: '360', label: 'Followers'),
+                child: _StatItem(
+                  count: '${l.followersCount}',
+                  label: 'Followers',
+                ),
               ),
               GestureDetector(
                 onTap: l.onFriends,
-                child: const _StatItem(count: '20', label: 'Friends'),
+                child: _StatItem(
+                  count: '${l.friendsCount}',
+                  label: 'Friends',
+                ),
               ),
             ],
           ),
@@ -316,7 +372,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   child: Text(
-                    'Photo(34)',
+                    'Photo(${l.posts.length})',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -375,12 +431,41 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                          child: Image.asset(
-                            video['thumbnail'],
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
+                          child: video['thumbnail'] != null &&
+                                  (video['thumbnail'] as String).isNotEmpty
+                              ? (video['thumbnail'] as String).startsWith('images/')
+                                  ? Image.asset(
+                                      video['thumbnail'],
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.network(
+                                      video['thumbnail'],
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          width: double.infinity,
+                                          height: 200,
+                                          color: const Color(0xFFE1F5FE),
+                                          child: const Center(
+                                            child: Icon(Icons.videocam,
+                                                size: 40, color: Color(0xFF90CAF9)),
+                                          ),
+                                        );
+                                      },
+                                    )
+                              : Container(
+                                  width: double.infinity,
+                                  height: 200,
+                                  color: const Color(0xFFE1F5FE),
+                                  child: const Center(
+                                    child: Icon(Icons.videocam,
+                                        size: 40, color: Color(0xFF90CAF9)),
+                                  ),
+                                ),
                         ),
                         // Play button overlay
                         Positioned.fill(
@@ -480,136 +565,151 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildPhotoList() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GetBuilder<ProfileLogic>(
-              builder: (l) {
-                if (l.posts.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                
-                final post = l.posts[0]; // 显示第一个帖子
-                return Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => l.onPostAuthorTap(0),
-                      child: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: const Color(0xFFBBDEFB),
-                        backgroundImage: post['avatar'] != null
-                            ? AssetImage(post['avatar'])
-                            : null,
-                        child: post['avatar'] == null
-                            ? const Icon(Icons.person, size: 30, color: Color(0xFF2196F3))
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          post['user'] ?? 'User',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GetBuilder<ProfileLogic>(
+      builder: (l) {
+        if (l.posts.isEmpty) {
+          return EmptyStateView(message: 'No posts available');
+        }
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: l.posts.length,
+          itemBuilder: (context, index) {
+            final post = l.posts[index];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // User info
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => l.onPostAuthorTap(index),
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: const Color(0xFFBBDEFB),
+                          backgroundImage: post['avatar'] != null &&
+                                  (post['avatar'] as String).startsWith('images/')
+                              ? AssetImage(post['avatar']) as ImageProvider
+                              : (post['avatar'] != null &&
+                                      (post['avatar'] as String).isNotEmpty
+                                  ? NetworkImage(post['avatar'])
+                                  : const AssetImage('images/head_1.jpg')),
                         ),
-                        Text(
-                          post['time'] ?? '',
-                          style: const TextStyle(fontSize: 12, color: Colors.black54),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            GetBuilder<ProfileLogic>(
-              builder: (l) {
-                if (l.posts.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                
-                final post = l.posts[0];
-                return Text(
-                  post['content'] ?? '',
-                  style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 120,
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE1F5FE),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(child: Icon(Icons.image, size: 40, color: Color(0xFF90CAF9))),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: 120,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE1F5FE),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(child: Icon(Icons.image, size: 40, color: Color(0xFF90CAF9))),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Row(
-                  children: const [
-                    Icon(Icons.remove_red_eye, size: 16, color: Colors.black54),
-                    SizedBox(width: 4),
-                    Text('12739', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                  ],
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE3F2FD),
-                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.favorite_border, size: 18, color: Colors.black54),
-                          SizedBox(width: 4),
-                          Text('24', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            post['user'] ?? 'User',
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            post['time'] ?? '',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black54),
+                          ),
                         ],
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Post content
+                  Text(
+                    post['content'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 14, color: Colors.black87, height: 1.5),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  // Post image
+                  if (post['image'] != null && (post['image'] as String).isNotEmpty)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        post['image'],
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 200,
+                            color: const Color(0xFFE1F5FE),
+                            child: const Center(
+                              child:
+                                  Icon(Icons.image, size: 40, color: Color(0xFF90CAF9)),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    const Icon(Icons.delete_outline, size: 24, color: Colors.black54),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+                  const SizedBox(height: 12),
+                  // Stats
+                  Row(
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.remove_red_eye,
+                              size: 16, color: Colors.black54),
+                          const SizedBox(width: 4),
+                          Text(
+                            post['views'] ?? '0',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE3F2FD),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  post['liked'] == true
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  size: 18,
+                                  color: post['liked'] == true
+                                      ? Colors.red
+                                      : Colors.black54,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${post['likes'] ?? 0}',
+                                  style: const TextStyle(
+                                      fontSize: 14, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

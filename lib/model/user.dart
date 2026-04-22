@@ -10,6 +10,9 @@ class _User {
   late String name;
   String? avatar;
   String? bio;
+  String? title; // 头衔
+  String? gender;
+  String? location;
   int following = 0;
   int followers = 0;
   int friends = 0;

@@ -14,6 +14,11 @@ class ProfileLogic extends GetxController {
   String currentUserId = '';
   String currentUserName = 'User';
   String currentUserAvatar = 'images/head_1.jpg';
+  String currentUserBio = '';
+  String currentUserTitle = ''; // 头衔
+  int followingCount = 0;
+  int followersCount = 0;
+  int friendsCount = 0;
 
   // 视频列表 - 从 Realm 加载
   List<Map<String, dynamic>> videos = [];
@@ -41,8 +46,23 @@ class ProfileLogic extends GetxController {
       final user = _realmService.getUserById(userId);
 
       if (user != null) {
+        currentUserId = user.id;
         currentUserName = user.name;
         currentUserAvatar = user.avatar ?? 'images/head_1.jpg';
+        currentUserBio = user.bio ?? '';
+        currentUserTitle = user.title ?? ''; // 加载头衔
+        
+        // 从实际的 Follow 记录计算数量，确保准确性
+        final followingUsers = _realmService.getFollowingUsers(userId);
+        final followerUsers = _realmService.getFollowersUsers(userId);
+        
+        followingCount = followingUsers.length;
+        followersCount = followerUsers.length;
+        
+        // 计算朋友数量：互相关注的用户
+        final followingIds = followingUsers.map((u) => u.id).toSet();
+        final followerIds = followerUsers.map((u) => u.id).toSet();
+        friendsCount = followingIds.intersection(followerIds).length;
 
         // Load user's posts
         final userPosts = _realmService.getPostsByUserId(userId);
@@ -54,7 +74,7 @@ class ProfileLogic extends GetxController {
                 'userId': post.userId,
                 'time': _formatTime(post.createdAt),
                 'content': post.description ?? 'No description',
-                'views': '${(post.likes * 10 + post.comments * 5)}',
+                'views': '${post.views}',
                 'likes': post.likes,
                 'liked': post.isLiked,
                 'avatar': post.userAvatar ?? 'images/head_1.jpg',
@@ -72,7 +92,7 @@ class ProfileLogic extends GetxController {
                 'thumbnail': post.image ?? '',
                 'videoPath': post.videoPath ?? '',
                 'duration': '2:30',
-                'views': '${post.likes}',
+                'views': '${post.views}',
                 'time': _formatTime(post.createdAt),
                 'postId': post.id,
                 'userId': post.userId,
@@ -106,6 +126,20 @@ class ProfileLogic extends GetxController {
     }
   }
 
+  /// Format user ID to numeric display
+  String formatUserId(String userId) {
+    // If the ID is already numeric, return as is
+    if (RegExp(r'^\d+$').hasMatch(userId)) {
+      return userId;
+    }
+    
+    // Convert string ID to a numeric representation
+    // Use hashCode and ensure it's positive and formatted nicely
+    final hash = userId.hashCode.abs();
+    // Format as an 8-10 digit number
+    return hash.toString().padLeft(8, '0');
+  }
+
   /// Load friend request count from Realm
   void loadFriendRequestCount() {
     if (currentUserId.isEmpty) return;
@@ -136,7 +170,12 @@ class ProfileLogic extends GetxController {
   }
 
   void onEditProfile() {
-    NavigationUtil.toEditProfile();
+    NavigationUtil.toEditProfile()?.then((result) {
+      // Refresh user data when returning from edit profile
+      if (result == true) {
+        loadCurrentUser();
+      }
+    });
   }
 
   void onSettings() {

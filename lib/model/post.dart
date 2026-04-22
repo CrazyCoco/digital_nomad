@@ -17,6 +17,7 @@ class _Post {
   int likes = 0;
   int comments = 0;
   int shares = 0;
+  int views = 0; // 浏览量
   bool isLiked = false;
   String? category; // Colab, Cafe, Outdoor
   String? weather;
