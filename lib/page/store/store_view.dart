@@ -41,21 +41,7 @@ class _StorePageState extends State<StorePage> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Text(
-            'Friend',
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFFF8C42),
-              shadows: [
-                Shadow(
-                  offset: const Offset(2, 2),
-                  blurRadius: 4,
-                  color: Colors.black.withOpacity(0.3),
-                ),
-              ],
-            ),
-          ),
+          Image.asset("images/icon_102.png", width: 109),
         ],
       ),
     );

@@ -55,44 +55,10 @@ class _ExplorePageState extends State<ExplorePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Explore',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFFF8C42),
-              shadows: [
-                Shadow(
-                  offset: const Offset(2, 2),
-                  blurRadius: 4,
-                  color: Colors.black.withOpacity(0.2),
-                ),
-              ],
-            ),
-          ),
+          Image.asset("images/icon_102.png", width: 109),
           GestureDetector(
             onTap: () => Get.to(() => const PostPage()),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: const [
-                  Text(
-                    '+Post',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(width: 4),
-                  Text('😊', style: TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
+            child: Image.asset("images/icon_105.png", width: 88),
           ),
         ],
       ),

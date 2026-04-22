@@ -76,21 +76,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Text(
-        'Nomad Chat',
-        style: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: const Color(0xFFFF8C42),
-          shadows: [
-            Shadow(
-              offset: const Offset(2, 2),
-              blurRadius: 4,
-              color: Colors.black.withOpacity(0.2),
-            ),
-          ],
-        ),
-      ),
+      child: Image.asset("images/icon_101.png", width: 201),
     );
   }
 

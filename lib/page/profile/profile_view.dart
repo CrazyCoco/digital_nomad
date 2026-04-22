@@ -61,27 +61,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Profile',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFFF8C42),
-              shadows: [
-                Shadow(
-                  offset: const Offset(2, 2),
-                  blurRadius: 4,
-                  color: Colors.black.withOpacity(0.2),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.grid_view, size: 28, color: Color(0xFF42A5F5)),
-        ],
+        children: [Image.asset("images/icon_106.png", width: 109)],
       ),
     );
   }
@@ -99,8 +82,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 backgroundImage: l.currentUserAvatar.startsWith('images/')
                     ? AssetImage(l.currentUserAvatar) as ImageProvider
                     : (l.currentUserAvatar.isNotEmpty
-                        ? NetworkImage(l.currentUserAvatar)
-                        : const AssetImage('images/head_1.jpg')),
+                          ? NetworkImage(l.currentUserAvatar)
+                          : const AssetImage('images/head_1.jpg')),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -112,7 +95,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         Expanded(
                           child: Text(
                             l.currentUserName,
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -120,7 +106,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         if (l.currentUserTitle.isNotEmpty) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFB74D),
                               borderRadius: BorderRadius.circular(12),
@@ -139,7 +128,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     Text(
                       'ID ${_formatUserId(l.currentUserId)}',
-                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -148,7 +140,10 @@ class _ProfilePageState extends State<ProfilePage> {
               GestureDetector(
                 onTap: logic.onEditProfile,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black54),
                     borderRadius: BorderRadius.circular(20),
@@ -157,7 +152,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       Icon(Icons.edit, size: 16, color: Colors.black54),
                       SizedBox(width: 4),
-                      Text('Edit Profile', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                      Text(
+                        'Edit Profile',
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      ),
                     ],
                   ),
                 ),
@@ -198,10 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               GestureDetector(
                 onTap: l.onFriends,
-                child: _StatItem(
-                  count: '${l.friendsCount}',
-                  label: 'Friends',
-                ),
+                child: _StatItem(count: '${l.friendsCount}', label: 'Friends'),
               ),
             ],
           ),
@@ -213,33 +208,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildRechargeButton() {
     return GestureDetector(
       onTap: logic.onRecharge,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFB74D),
-          borderRadius: BorderRadius.circular(27),
-        ),
-        child: Row(
-          children: [
-            const Text(
-              'Recharge coins',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            const Spacer(),
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.amber,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.orange, width: 2),
-              ),
-              child: const Icon(Icons.star, size: 28, color: Colors.white),
-            ),
-          ],
-        ),
-      ),
+      child: Image.asset(
+        "images/icon_107.png",
+        width: Get.width - 30,
+      ).marginOnly(left: 15, right: 15),
     );
   }
 
@@ -339,11 +311,16 @@ class _ProfilePageState extends State<ProfilePage> {
               GestureDetector(
                 onTap: () => l.selectContentTab(0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: l.contentTab == 0 ? const Color(0xFF42A5F5) : Colors.transparent,
+                        color: l.contentTab == 0
+                            ? const Color(0xFF42A5F5)
+                            : Colors.transparent,
                         width: 3,
                       ),
                     ),
@@ -362,11 +339,16 @@ class _ProfilePageState extends State<ProfilePage> {
               GestureDetector(
                 onTap: () => l.selectContentTab(1),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: l.contentTab == 1 ? const Color(0xFF42A5F5) : Colors.transparent,
+                        color: l.contentTab == 1
+                            ? const Color(0xFF42A5F5)
+                            : Colors.transparent,
                         width: 3,
                       ),
                     ),
@@ -430,40 +412,52 @@ class _ProfilePageState extends State<ProfilePage> {
                     Stack(
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                          child: video['thumbnail'] != null &&
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          child:
+                              video['thumbnail'] != null &&
                                   (video['thumbnail'] as String).isNotEmpty
-                              ? (video['thumbnail'] as String).startsWith('images/')
-                                  ? Image.asset(
-                                      video['thumbnail'],
-                                      width: double.infinity,
-                                      height: 200,
-                                      fit: BoxFit.cover,
+                              ? (video['thumbnail'] as String).startsWith(
+                                      'images/',
                                     )
-                                  : Image.network(
-                                      video['thumbnail'],
-                                      width: double.infinity,
-                                      height: 200,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          width: double.infinity,
-                                          height: 200,
-                                          color: const Color(0xFFE1F5FE),
-                                          child: const Center(
-                                            child: Icon(Icons.videocam,
-                                                size: 40, color: Color(0xFF90CAF9)),
-                                          ),
-                                        );
-                                      },
-                                    )
+                                    ? Image.asset(
+                                        video['thumbnail'],
+                                        width: double.infinity,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.network(
+                                        video['thumbnail'],
+                                        width: double.infinity,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                width: double.infinity,
+                                                height: 200,
+                                                color: const Color(0xFFE1F5FE),
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.videocam,
+                                                    size: 40,
+                                                    color: Color(0xFF90CAF9),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                      )
                               : Container(
                                   width: double.infinity,
                                   height: 200,
                                   color: const Color(0xFFE1F5FE),
                                   child: const Center(
-                                    child: Icon(Icons.videocam,
-                                        size: 40, color: Color(0xFF90CAF9)),
+                                    child: Icon(
+                                      Icons.videocam,
+                                      size: 40,
+                                      color: Color(0xFF90CAF9),
+                                    ),
                                   ),
                                 ),
                         ),
@@ -596,13 +590,16 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: CircleAvatar(
                           radius: 24,
                           backgroundColor: const Color(0xFFBBDEFB),
-                          backgroundImage: post['avatar'] != null &&
-                                  (post['avatar'] as String).startsWith('images/')
+                          backgroundImage:
+                              post['avatar'] != null &&
+                                  (post['avatar'] as String).startsWith(
+                                    'images/',
+                                  )
                               ? AssetImage(post['avatar']) as ImageProvider
                               : (post['avatar'] != null &&
-                                      (post['avatar'] as String).isNotEmpty
-                                  ? NetworkImage(post['avatar'])
-                                  : const AssetImage('images/head_1.jpg')),
+                                        (post['avatar'] as String).isNotEmpty
+                                    ? NetworkImage(post['avatar'])
+                                    : const AssetImage('images/head_1.jpg')),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -612,12 +609,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           Text(
                             post['user'] ?? 'User',
                             style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
                             post['time'] ?? '',
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.black54),
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ],
                       ),
@@ -628,13 +629,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   Text(
                     post['content'] ?? '',
                     style: const TextStyle(
-                        fontSize: 14, color: Colors.black87, height: 1.5),
+                      fontSize: 14,
+                      color: Colors.black87,
+                      height: 1.5,
+                    ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 12),
                   // Post image
-                  if (post['image'] != null && (post['image'] as String).isNotEmpty)
+                  if (post['image'] != null &&
+                      (post['image'] as String).isNotEmpty)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
@@ -647,8 +652,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 200,
                             color: const Color(0xFFE1F5FE),
                             child: const Center(
-                              child:
-                                  Icon(Icons.image, size: 40, color: Color(0xFF90CAF9)),
+                              child: Icon(
+                                Icons.image,
+                                size: 40,
+                                color: Color(0xFF90CAF9),
+                              ),
                             ),
                           );
                         },
@@ -660,13 +668,18 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.remove_red_eye,
-                              size: 16, color: Colors.black54),
+                          const Icon(
+                            Icons.remove_red_eye,
+                            size: 16,
+                            color: Colors.black54,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             post['views'] ?? '0',
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.black54),
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ],
                       ),
@@ -675,7 +688,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFE3F2FD),
                               borderRadius: BorderRadius.circular(16),
@@ -695,7 +710,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Text(
                                   '${post['likes'] ?? 0}',
                                   style: const TextStyle(
-                                      fontSize: 14, fontWeight: FontWeight.bold),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -723,15 +740,22 @@ class _ProfilePageState extends State<ProfilePage> {
 class _StatItem extends StatelessWidget {
   final String count;
   final String label;
+
   const _StatItem({required this.count, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(count, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        Text(
+          count,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 14, color: Colors.black54)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.black54),
+        ),
       ],
     );
   }

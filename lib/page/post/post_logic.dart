@@ -11,22 +11,27 @@ import '../../model/user.dart';
 
 class PostLogic extends GetxController {
   final ImagePicker _picker = ImagePicker();
-  
+
   String content = '';
   int selectedTab = 0;
-  
+
   final List<String> images = [];
-  
+
   @override
-  void onReady() { super.onReady(); }
+  void onReady() {
+    super.onReady();
+  }
+
   @override
-  void onClose() { super.onClose(); }
-  
+  void onClose() {
+    super.onClose();
+  }
+
   void updateContent(String value) {
     content = value;
     update();
   }
-  
+
   /// Pick image from gallery
   Future<void> pickImageFromGallery() async {
     try {
@@ -48,7 +53,7 @@ class PostLogic extends GetxController {
         source: ImageSource.gallery,
         imageQuality: 80,
       );
-      
+
       if (image != null) {
         images.add(image.path);
         update();
@@ -58,7 +63,7 @@ class PostLogic extends GetxController {
       EasyLoading.showError('Failed to pick image: $e');
     }
   }
-  
+
   /// Take photo from camera
   Future<void> takePhoto() async {
     try {
@@ -76,7 +81,7 @@ class PostLogic extends GetxController {
         source: ImageSource.camera,
         imageQuality: 80,
       );
-      
+
       if (image != null) {
         images.add(image.path);
         update();
@@ -86,7 +91,7 @@ class PostLogic extends GetxController {
       EasyLoading.showError('Failed to take photo: $e');
     }
   }
-  
+
   /// Show image source dialog
   void showImageSourceDialog() {
     showCupertinoModalPopup(
@@ -118,44 +123,44 @@ class PostLogic extends GetxController {
       ),
     );
   }
-  
+
   void addImage() {
     showImageSourceDialog();
   }
-  
+
   void removeImage(int index) {
     images.removeAt(index);
     update();
   }
-  
-  void selectTab(int index) { 
+
+  void selectTab(int index) {
     selectedTab = index;
     update();
   }
-  
+
   void post() {
     if (content.isEmpty && images.isEmpty) {
       EasyLoading.showError('Please add content or images');
       return;
     }
-    
+
     // 检查金币余额
     final box = GetStorage();
     final currentUserId = box.read('user_id') as String?;
-    
+
     if (currentUserId == null) {
       EasyLoading.showError('Please login first');
       return;
     }
-    
+
     final realmService = RealmService();
     final currentUser = realmService.getUserById(currentUserId);
-    
+
     if (currentUser == null) {
       EasyLoading.showError('User not found');
       return;
     }
-    
+
     // 检查金币是否足够
     if (currentUser.coins < 30) {
       EasyLoading.showError(
@@ -164,9 +169,9 @@ class PostLogic extends GetxController {
       );
       return;
     }
-    
+
     EasyLoading.show(status: 'Posting...');
-    
+
     try {
       // 扣除30金币
       final updatedCoins = currentUser.coins - 30;
@@ -187,9 +192,9 @@ class PostLogic extends GetxController {
         createdAt: currentUser.createdAt,
         updatedAt: DateTime.now(),
       );
-      
+
       realmService.upsertUser(updatedUser);
-      
+
       // 创建并保存 Post 到 Realm 数据库
       final postId = 'post_${DateTime.now().millisecondsSinceEpoch}';
       final post = Post(
@@ -205,15 +210,19 @@ class PostLogic extends GetxController {
         shares: 0,
         views: 0,
         isLiked: false,
-        category: selectedTab == 0 ? 'Colab' : selectedTab == 1 ? 'Cafe' : 'Outdoor',
+        category: selectedTab == 0
+            ? 'Colab'
+            : selectedTab == 1
+            ? 'Cafe'
+            : 'Outdoor',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       realmService.createPost(post);
-      
+
       print('Post created successfully: $postId');
-      
+
       // 发布成功后返回
       Future.delayed(const Duration(seconds: 1), () {
         EasyLoading.dismiss();

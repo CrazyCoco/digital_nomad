@@ -60,45 +60,10 @@ class _HomePageState extends State<HomePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Coco',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFFF8C42),
-              fontFamily: 'Arial',
-              shadows: [
-                Shadow(
-                  offset: const Offset(2, 2),
-                  blurRadius: 4,
-                  color: Colors.black.withOpacity(0.2),
-                ),
-              ],
-            ),
-          ),
+          Image.asset("images/Coco@3x.png", width: 79),
           GestureDetector(
             onTap: () => Get.to(() => const PostPage()),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  const Text(
-                    '+Post',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text('😊', style: const TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
+            child: Image.asset("images/icon_105.png", width: 88),
           ),
         ],
       ),
@@ -106,62 +71,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBanner() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      height: 100,
-      decoration: BoxDecoration(
-        color: const Color(0xFFB3E5FC),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: RichText(
-                text: const TextSpan(
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  children: [
-                    TextSpan(text: 'Most Loved by\nNomads '),
-                    WidgetSpan(
-                      child: Icon(
-                        Icons.arrow_forward,
-                        size: 20,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Container(
-            width: 120,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(Icons.emoji_events, size: 50, color: Colors.amber),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Icon(Icons.star, size: 20, color: Colors.orange),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return Image.asset(
+      "images/icon_104.png",
+      width: Get.width - 30,
+    ).marginOnly(left: 15, right: 15);
   }
 
   Widget _buildSuggestedUsers() {
@@ -374,7 +287,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPostCard(Map<String, dynamic> post, int index, HomeLogic? homeLogic) {
+  Widget _buildPostCard(
+    Map<String, dynamic> post,
+    int index,
+    HomeLogic? homeLogic,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       height: 200,
