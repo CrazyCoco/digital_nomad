@@ -55,7 +55,7 @@ class _ExplorePageState extends State<ExplorePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset("images/icon_102.png", width: 109),
+          Image.asset("images/icon_103.png", width: 109),
           GestureDetector(
             onTap: () => Get.to(() => const PostPage()),
             child: Image.asset("images/icon_105.png", width: 88),

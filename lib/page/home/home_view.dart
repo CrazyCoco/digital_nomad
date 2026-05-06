@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset("images/Coco@3x.png", width: 79),
+          Image.asset("images/Lovena@3x.png", width: 79),
           GestureDetector(
             onTap: () => Get.to(() => const PostPage()),
             child: Image.asset("images/icon_105.png", width: 88),
