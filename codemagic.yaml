@@ -1,0 +1,86 @@
+# Codemagic CI/CD 配置文件 - iOS 在线打包
+workflows:
+  ios-build-workflow:
+    name: iOS Build & Export IPA
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    
+    environment:
+      # iOS 签名配置
+      ios_signing:
+        distribution_type: app_store  # 可选: app_store, ad_hoc, development
+        bundle_identifier: app.lovena.com  # 替换为你的 Bundle ID
+      
+      # 环境变量
+      vars:
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+      
+      # Flutter 和工具版本
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+    
+    scripts:
+      - name: Initialize keychain
+        script: |
+          keychain initialize
+      
+      - name: Fetch signing certificates and profiles
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_IDENTIFIER" --type IOS_APP_STORE --create
+      
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+      
+      - name: Configure code signing
+        script: |
+          xcode-project use-profiles
+      
+      - name: Set up Flutter
+        script: |
+          flutter pub get
+      
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install && cd ..
+      
+      - name: Build iOS IPA
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+      
+      - name: Verify IPA file
+        script: |
+          echo "IPA files generated:"
+          ls -lh build/ios/ipa/*.ipa || echo "No IPA files found"
+    
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app.dSYM.zip
+    
+    publishing:
+      # 邮件通知
+      email:
+        recipients:
+          - your_email@example.com
+        notify:
+          success: true
+          failure: true
+      
+      # Slack 通知（可选）
+      # slack:
+      #   channel: '#builds'
+      #   notify_on_success: true
+      #   notify_on_failure: true
