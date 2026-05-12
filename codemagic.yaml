@@ -2,19 +2,21 @@
 workflows:
   ios-build-workflow:
     name: iOS Build & Export IPA
-    max_build_duration: 60
+    max_build_duration: 70
     instance_type: mac_mini_m2
     
     environment:
-      # iOS 签名配置
+      
+      # iOS 签名配置 - 使用已上传的证书
       ios_signing:
         distribution_type: app_store  # 可选: app_store, ad_hoc, development
-        bundle_identifier: app.lovena.com  # 替换为你的 Bundle ID
+        bundle_identifier: app.lovena.com  # ⚠️ 请替换为你的实际 Bundle ID
       
       # 环境变量
       vars:
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
+        SHOREBIRD_TOKEN: "@secure:sb_api_heYLjprCEkEAfPTgWO6oNoL2p1x0LVEnZwfseFTbAcc"  # ⚠️ 请在 Codemagic 环境变量中配置（Secure）
       
       # Flutter 和工具版本
       flutter: stable
@@ -33,32 +35,45 @@ workflows:
       - name: Initialize keychain
         script: |
           keychain initialize
-      
+
       - name: Fetch signing certificates and profiles
         script: |
-          app-store-connect fetch-signing-files "$BUNDLE_IDENTIFIER" --type IOS_APP_STORE --create
-      
+          # 如果使用了 App Store Connect API，取消下面注释
+          # app-store-connect fetch-signing-files "$BUNDLE_IDENTIFIER" --type IOS_APP_STORE --create
+          
+          # 如果使用上传的证书文件，Codemagic 会自动处理
+          echo "Using uploaded certificates for code signing"
+
       - name: Add certificates to keychain
         script: |
           keychain add-certificates
-      
+
       - name: Configure code signing
         script: |
           xcode-project use-profiles
-      
+
       - name: Set up Flutter
         script: |
           flutter pub get
       
+      # - name: Install Shorebird
+      #   script: |
+      #     curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+      #     echo "$HOME/.shorebird/bin" >> $PATH
+      
+      # - name: Authenticate Shorebird
+      #   script: |
+      #     shorebird auth login --token "$SHOREBIRD_TOKEN"
+
       - name: Install CocoaPods dependencies
         script: |
           cd ios && pod install && cd ..
-      
+
       - name: Build iOS IPA
         script: |
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
-      
+
       - name: Verify IPA file
         script: |
           echo "IPA files generated:"
@@ -74,7 +89,7 @@ workflows:
       # 邮件通知
       email:
         recipients:
-          - your_email@example.com
+          - godkiller@example.com  # ⚠️ 请替换为你的实际邮箱地址
         notify:
           success: true
           failure: true
