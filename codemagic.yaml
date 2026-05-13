@@ -19,8 +19,8 @@ workflows:
         SHOREBIRD_TOKEN: "@secure:sb_api_heYLjprCEkEAfPTgWO6oNoL2p1x0LVEnZwfseFTbAcc"  # ⚠️ 请在 Codemagic 环境变量中配置（Secure）
       
       # Flutter 和工具版本
-      flutter: stable
-      xcode: latest
+      flutter: 3.16.4
+      xcode: 26
       cocoapods: default
     
     triggering:
